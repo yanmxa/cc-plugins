@@ -1,0 +1,22 @@
+# Ignore everything by default
+*
+
+# But track these specific directories
+!agents/
+!agents/**
+!commands/
+!commands/**
+!hooks/
+!hooks/**
+
+# Always ignore git files in subdirectories
+**/.git/
+**/.git/**
+
+# Always ignore sensitive files even in tracked directories
+**/*.key
+**/*.pem
+**/secrets.*
+**/credentials.*
+**/*_private.*
+**/*_secret.*
