@@ -6,8 +6,9 @@
 !agents/**
 !commands/
 !commands/**
-!hooks/
-!hooks/**
+!configs/
+!configs/**
+!README.md
 
 # Always ignore git files in subdirectories
 **/.git/
