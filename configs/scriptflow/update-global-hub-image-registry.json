@@ -1,0 +1,17 @@
+{
+  "name": "update-global-hub-image-registry",
+  "description": "Updates the image registry for Global Hub operator, manager, and agent components without changing image names or tags",
+  "language": "bash",
+  "created": "2025-08-04T08:34:06.732Z",
+  "tags": [
+    "kubernetes",
+    "global-hub",
+    "image-registry",
+    "deployment"
+  ],
+  "parameters": [
+    "new-registry",
+    "namespace (optional, default: multicluster-global-hub)"
+  ],
+  "updated": "2025-08-11T12:52:49.790Z"
+}

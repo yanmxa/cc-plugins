@@ -1,0 +1,13 @@
+{
+  "name": "update-globalhub-manifests",
+  "description": "Update manifests from hub-of-hubs operator bundle with configurable paths",
+  "language": "bash",
+  "created": "2025-08-27T08:05:14.388Z",
+  "tags": [],
+  "parameters": [
+    "base-branch (required)",
+    "source-manifests-path (optional)",
+    "target-manifests-path (optional)"
+  ],
+  "updated": "2025-08-27T08:14:28.600Z"
+}

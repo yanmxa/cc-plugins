@@ -1,0 +1,20 @@
+{
+  "name": "load-image-to-kind-cluster",
+  "description": "Loads images to Kind cluster to resolve ImagePullBackOff and ContainerCreating issues. Pre-loads required images and restarts affected pods with optimized handling for resource-constrained systems.",
+  "language": "bash",
+  "created": "2025-08-11T01:23:26.872Z",
+  "tags": [
+    "kind",
+    "kubernetes",
+    "image-loading",
+    "troubleshooting",
+    "containerCreating",
+    "open-cluster-management",
+    "ocm",
+    "kind-cluster"
+  ],
+  "parameters": [
+    "kind-cluster-name (optional, default: hub)"
+  ],
+  "updated": "2025-08-11T01:27:18.436Z"
+}
