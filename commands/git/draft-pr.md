@@ -1,4 +1,4 @@
-# Draft PR to $ARGUMENTS
+# Create PR to $ARGUMENTS
 
 Create a pull request following Git best practices:
 
@@ -6,7 +6,7 @@ Create a pull request following Git best practices:
 
 1. **Sync & Branch**: Update main + create feature branch with appropriate prefix
 2. **Commit**: Stage relevant files + commit with conventional message and sign-off
-3. **Push & PR**: Push branch + draft PR with detailed description
+3. **Push & PR**: Push branch + create ready PR with detailed description
 
 ## Target:
 - If $ARGUMENTS provided: use as target repo/branch
@@ -39,11 +39,11 @@ Detailed description of what and why this change is made.
 - List specific changes
 - Reference issue numbers if applicable
 
-Signed-off-by: myan <myan@redhat.com>"
+Signed-off-by: Meng Yan <myan@redhat.com>"
 
-# 3. Push & Draft PR
+# 3. Push & Create PR
 git push -u origin $(git branch --show-current)
-gh pr create --base ${TARGET#*/} --draft --title "Title" --body "$(cat <<'EOF'
+gh pr create --base ${TARGET#*/} --title "Title" --body "$(cat <<'EOF'
 ## Summary
 Brief description of the change and its purpose
 
