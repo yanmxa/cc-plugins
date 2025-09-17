@@ -25,9 +25,9 @@ Extract and save the current or most recent session workflow as a structured mar
 **Format**: `category:name` → `.claude/commands/category/name.md`
 
 **Examples**:
-- `git:draft-pr` → `.claude/commands/git/draft-pr.md`
-- `docker:build` → `.claude/commands/docker/build.md`
-- `test:run-unit` → `.claude/commands/test/run-unit.md`
+- `git:draft-pr` → `~/.claude/commands/git/draft-pr.md`
+- `docker:build` → `~/.claude/commands/docker/build.md`
+- `test:run-unit` → `~/.claude/commands/test/run-unit.md`
 
 **Auto-detection** (when no arguments provided):
 - Git operations → `git:workflow`
