@@ -32,14 +32,12 @@ fi
 
 # 2. Stage & Commit with conventional format
 git add path/to/relevant/files
-git commit -m "feat: descriptive title
+git commit -s -m "feat: descriptive title
 
 Detailed description of what and why this change is made.
 
 - List specific changes
-- Reference issue numbers if applicable
-
-Signed-off-by: Meng Yan <myan@redhat.com>"
+- Reference issue numbers if applicable"
 
 # 3. Push & Create PR
 git push -u origin $(git branch --show-current)
