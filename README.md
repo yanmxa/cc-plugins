@@ -6,37 +6,66 @@ Personal Claude Code configuration and workflow automation setup.
 
 This repository contains custom workflows, hooks, and MCP integrations to enhance Claude Code productivity through:
 
-- **Custom Commands**: Pre-built workflows for common development tasks
-- **Smart Hooks**: Audio-enabled confirmation system for better UX
-- **ScriptFlow MCP**: Efficient script workflow management and automation
+- **Slash Commands**: Pre-built workflows with automatic command creation capabilities
+- **ScriptFlow Integration**: Efficient script workflow management and automation
+- **Smart Configurations**: Audio hooks, MCP settings, and system integrations
 
 ## 📁 Structure
 
 ```text
 .claude/
-├── commands/           # Custom workflow commands
-│   ├── git/           # Git workflow automation
-│   └── globalhub/     # Project-specific workflows
-├── configs/           # Configuration files
-│   ├── hooks/         # Hook configurations
-│   │   └── notifications/  # Audio notification files
-│   └── scriptflow/    # ScriptFlow MCP scripts and configs
-└── CLAUDE.md         # Global instructions and guidelines
+├── commands/           # Custom slash command workflows
+│   ├── claude/         # Meta-commands for command creation
+│   ├── git/            # Git workflow automation
+│   ├── jira/           # Jira integration workflows
+│   └── globalhub/      # Project-specific workflows
+├── configs/            # Configuration files
+│   ├── hooks/          # Hook configurations with audio notifications
+│   └── scriptflow/     # ScriptFlow MCP scripts and configs
+└── CLAUDE.md          # Global instructions and guidelines
 ```
 
-## 🔧 Commands Workflows
+## 🔧 Slash Commands
 
-### Git Workflows (`commands/git/`)
+### Self-Creating Commands (`commands/claude/`)
 
-- **`commit.md`**: Git commit guide with best practices
-- **`draft-pr.md`**: Automated PR creation workflow  
-- **`review-pr.md`**: Systematic PR review process
+- **`command-create.md`**: Automatically extract and save current session workflows as reusable slash commands
+  - **Usage**: `/claude:command-create [category/name]` or leave empty for auto-detection
+  - **Auto-detection**: Analyzes workflow patterns to categorize appropriately
 
-### Project Workflows (`commands/globalhub/`)
+### Available Command Categories
 
-- **`update-manifests.md`**: Global Hub manifest synchronization with scriptflow-mcp
+- **Git Workflows** (`commands/git/`): Commit, PR creation, and review processes
+- **Jira Integration** (`commands/jira/`): Issue management and GitHub PR linking
+- **Project Workflows** (`commands/globalhub/`): Project-specific automation workflows
 
-## ⚙️ Configs
+## 📜 ScriptFlow MCP (Supplement)
+
+Powerful script workflow management system that converts natural language workflows into executable scripts.
+
+### 🔧 Installation
+
+```bash
+claude mcp add scriptflow -e SCRIPTFLOW_SCRIPTS_DIR=~/.claude/configs/scriptflow -- npx -y scriptflow-mcp
+```
+
+**Reference**: [ScriptFlow MCP GitHub Repository](https://github.com/yanmxa/scriptflow-mcp)
+
+### 💡 Commands + ScriptFlow = Double Efficiency
+
+- **Convert workflows**: Natural language → executable scripts
+- **Reusable automation**: Version-controlled workflows
+- **Reduced token consumption**: More efficient workflow execution
+- **Lower latency**: Less LLM interactions, faster execution
+
+### Script Management
+
+ScriptFlow scripts are stored in `configs/scriptflow/` and can be:
+- **Created**: Convert any workflow to a reusable script
+- **Executed**: Run with parameters through slash commands
+- **Managed**: List, edit, and remove scripts as needed
+
+## ⚙️ Configurations
 
 ### Hooks (`configs/hooks/`)
 
@@ -51,33 +80,50 @@ Audio-enabled confirmation system that provides:
 - `confirm.mp3`: Plays when user confirmation is needed
 - `success.mp3`: Plays when operations complete successfully
 
-### ScriptFlow MCP (`configs/scriptflow/`)
+**Setup**: Add to your `~/.claude/settings.json`:
 
-Powerful script workflow management system for managing shell, Node.js, and Python scripts. Converts workflows into executable scripts with parameter handling.
-
-#### 🔧 Installation
-
-```bash
-claude mcp add scriptflow -e SCRIPTFLOW_SCRIPTS_DIR=~/.claude/configs/scriptflow -- npx -y scriptflow-mcp
+```json
+"hooks": {
+  "Notification": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "afplay ~/.claude/configs/hooks/notifications/confirm.mp3"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "afplay ~/.claude/configs/hooks/notifications/success.mp3"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-**Reference**: [ScriptFlow MCP GitHub Repository](https://github.com/yanmxa/scriptflow-mcp)
+### ScriptFlow Scripts (`configs/scriptflow/`)
 
-#### 💡 Benefits
-
-##### Commands + ScriptFlow = Double Efficiency
-
-- Convert natural language to executable scripts
-- Reusable and version-controlled workflows
-- More efficient workflow execution reducing repetitive token consumption
-- Reduced latency from multiple LLM interactions, making workflows consume less time
+Automated scripts created and managed through ScriptFlow MCP:
+- Shell scripts for system operations
+- Node.js scripts for complex automation
+- Python scripts for data processing
+- Parameter handling and validation
 
 ## 🛠 How It Works
 
-1. **Command Definition**: Define workflows in `commands/` using markdown templates
-2. **ScriptFlow Integration**: Reference ScriptFlow scripts for complex automation
-3. **Hook Notifications**: Get audio feedback during execution
-4. **Parameter Parsing**: Natural language converted to script parameters automatically
+1. **Slash Commands**: Use pre-built workflows or create new ones automatically
+2. **Command Creation**: `/claude:command-create` extracts current session workflows
+3. **ScriptFlow Integration**: Complex automation through executable scripts
+4. **Hook Notifications**: Audio feedback during execution
+5. **Parameter Parsing**: Natural language converted to command/script parameters
 
 ## 🎯 Benefits
 
@@ -89,33 +135,43 @@ claude mcp add scriptflow -e SCRIPTFLOW_SCRIPTS_DIR=~/.claude/configs/scriptflow
 
 ## 📚 Usage Examples
 
-### Simple Git Commit
+### Create New Command from Session
 
 ```text
-Use: commands/git/commit.md
-Result: Guided commit process with best practices
+# After completing a workflow:
+/claude:command-create docker/build-prod
+# Result: Saves current session as reusable docker/build-prod.md command
 ```
 
-### Create Feature PR
+### Git Operations
 
 ```text
-Use: commands/git/draft-pr.md
-Result: Automated branch + commit + PR creation
+/git:commit-push --push
+# Result: Commits changes with sign-off and pushes to origin
 ```
 
-### Update Manifests
+### Jira Integration
 
 ```text
-Use: commands/globalhub/update-manifests.md  
-Example: "update branch release-1.6"
-Result: ScriptFlow executes manifest sync workflow
+/jira:my-issues
+# Result: Shows current sprint issues organized by status
+
+/jira:my-issues 7d john.doe
+# Result: Shows john.doe's issues from last 7 days
+```
+
+### Project Automation
+
+```text
+/globalhub:update-manifests release-1.6
+# Result: ScriptFlow executes manifest sync workflow
 ```
 
 ## 🚀 Getting Started
 
-1. Clone this configuration to `~/.claude/`
-2. Install ScriptFlow MCP (see installation command above)
-3. Configure audio notifications (ensure sound files are present)
-4. Start using commands with natural language parameters
+1. **Clone Configuration**: Copy this setup to `~/.claude/`
+2. **Install ScriptFlow**: Run the MCP installation command
+3. **Configure Audio**: Add hooks to `settings.json` and ensure sound files exist
+4. **Start Creating**: Use existing commands or create new ones with `/claude:command-create`
 
-The combination of structured commands, intelligent scripting, and audio feedback creates a powerful development workflow that gets twice the work done with half the effort.
+The combination of self-creating slash commands, intelligent scripting, and audio feedback creates a powerful development workflow that evolves with your needs while providing instant productivity gains.
