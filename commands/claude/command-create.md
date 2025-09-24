@@ -1,6 +1,6 @@
 ---
-argument-hint: [category/name] or leave empty for auto-detection
-description: Extract and save current session workflow as a reusable slash command
+argument-hint: "[category/name] or leave empty for auto-detection"
+description: "Extract and save current session workflow as a reusable slash command"
 allowed-tools: [Write, Edit, MultiEdit, Glob, Read]
 ---
 
