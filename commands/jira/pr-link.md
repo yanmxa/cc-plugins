@@ -7,23 +7,21 @@ $ARGUMENTS should contain a Jira issue key and GitHub PR URL in flexible format 
 
 ## Steps:
 
-1. **Check for existing PR field in Jira**: Use the jira-administrator agent to check if the Jira issue has a dedicated pull request field/column
-2. **Add PR link to Jira issue**:
-   - If PR field exists: Append the GitHub PR link to the existing pull request field/column
-   - If PR field doesn't exist: Add a comment to the Jira issue containing the GitHub PR link
-3. **Get current PR description**: Use `gh pr view` to fetch the current PR description and title from the GitHub PR
-4. **Update PR description with Jira link**: Use `gh pr edit` to add a "Related Jira Issue" section to the PR description with the Jira issue link
-5. **Verify and update Jira issue status**:
-   - Check if the issue status is "New"
-   - If status is "New", transition it to "In Progress" using `jira issue move`
-6. **Check and assign sprint**:
-   - Check if the issue is assigned to any sprint
-   - If no sprint is assigned, get the current active sprint using `jira sprint list --table` and find the sprint with "active" state
-   - Assign the issue to the active sprint using `jira sprint add <sprint-id> <issue-key>`
-7. **Verify and set story points**:
-   - Check if the issue has story points assigned
-   - If story points are not set and user hasn't specified them in the arguments, ask the user for story points
-   - Update the issue with story points using `jira issue edit <issue-key> --no-input --custom story-points=<value>`
+1. **Batch Information Gathering**: Run in parallel using single message with multiple tool calls:
+   - `jira issue view <issue-key>` to get current issue status, sprint assignment, and story points
+   - `gh pr view <pr-number> --repo <repo>` to get current PR description and details
+
+2. **GitHub PR Operations**:
+   - Update PR description with "Related Jira Issue" section using `gh pr edit`
+   - Preserve existing PR description content
+
+3. **Jira Issue Operations** (batch these together to minimize interactions):
+   - Check if PR link already exists in issue comments; if found, skip adding PR link comment
+   - If PR link not found, add PR link comment using `jira issue comment add <issue-key> "Related GitHub PR: <pr-url>" with optional concise PR description
+   - If issue status is "New", transition to "In Progress" using `jira issue move`
+   - If no sprint assigned, add to current active sprint using `jira sprint add <sprint-id> <issue-key>`
+   - If no story points and user provided value in arguments, set using `jira issue edit <issue-key> --no-input --custom story-points=<value>`
+   - If no story points and not specified in arguments, ask user once for story points value
 
 ## Target:
 - Creates bidirectional linking between Jira issues and GitHub PRs for better traceability
