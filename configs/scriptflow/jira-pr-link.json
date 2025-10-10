@@ -1,0 +1,18 @@
+{
+  "name": "jira-pr-link",
+  "description": "Link Jira issue and GitHub PR bidirectionally with automatic status/sprint/story points management",
+  "language": "bash",
+  "created": "2025-10-10T08:34:38.946Z",
+  "tags": [
+    "jira",
+    "github",
+    "pr",
+    "workflow",
+    "automation"
+  ],
+  "parameters": [
+    "issue-key: Jira issue key (e.g., ACM-25088)",
+    "pr-url: GitHub PR URL (e.g., https://github.com/org/repo/pull/123)",
+    "story-points (optional): Story points value to set"
+  ]
+}
