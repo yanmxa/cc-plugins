@@ -1,10 +1,8 @@
 # Claude Code Plugins Collection
 
-> Claude Code plugins for lazy developers (in a good way) - automate and capture workflows to reclaim your time
+> Productivity-focused Claude Code plugins - automate workflows and reclaim your development time
 
-A collection of [Claude Code plugins](https://www.anthropic.com/news/claude-code-plugins) that turn repetitive tasks into one-liners.
-
-**Repository**: [https://github.com/yanmxa/claude-code-plugins](https://github.com/yanmxa/claude-code-plugins)
+A collection of [Claude Code plugins](https://www.anthropic.com/news/claude-code-plugins) that streamline common development tasks.
 
 ## Plugins
 
