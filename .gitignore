@@ -1,18 +1,4 @@
-# Ignore everything by default
-*
 
-# But track these specific directories
-!agents/
-!agents/**
-!commands/
-!commands/**
-!configs/
-!configs/**
-!README.md
-
-# Always ignore git files in subdirectories
-**/.git/
-**/.git/**
 
 # Always ignore sensitive files even in tracked directories
 **/*.key
@@ -21,4 +7,4 @@
 **/credentials.*
 **/*_private.*
 **/*_secret.*
-jira-administrator.md
+.claude

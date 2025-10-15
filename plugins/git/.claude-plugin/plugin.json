@@ -1,0 +1,9 @@
+{
+  "name": "claude-dev",
+  "description": "Claude Development Plugin",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "myan@redhat.com"
+  }
+}

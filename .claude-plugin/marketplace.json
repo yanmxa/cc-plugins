@@ -1,0 +1,23 @@
+{
+  "name": "claude-code-plugins",
+  "version": "1.0.0",
+  "description": "Claude Code Plugins for comprehensive workflow automation with Git, Jira integration, and self-extending commands",
+  "owner": {
+    "name": "Meng Yan",
+    "email": "myan@redhat.com"
+  },
+  "plugins": [
+    {
+      "source": "./claude-dev",
+      "name": "claude-dev",
+      "description": "Claude Development Plugin That Can Create Commands, Scripts, and Hooks for Claude Code",
+      "category": "development"
+    },
+    {
+      "source": "./git-tookit",
+      "name": "git-dev",
+      "description": "Comprehensive Git Development Workflows Speicializing in Git Operations",
+      "category": "productivity"
+    }
+  ]
+}
