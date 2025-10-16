@@ -18,7 +18,7 @@ Comprehensive Git workflow automation plugin providing slash commands for commit
 
 ```bash
 # Add this repository as a plugin marketplace
-/plugin marketplace add github:yanmxa/claude-code-plugins
+/plugin marketplace add https://github.com/yanmxa/claude-code-plugins
 
 # Install individual plugins
 /plugin install claude-dev
