@@ -8,14 +8,14 @@
   },
   "plugins": [
     {
-      "source": "./claude-dev",
-      "name": "claude-dev",
+      "source": "./claude",
+      "name": "claude",
       "description": "Claude Development Plugin That Can Create Commands, Scripts, and Hooks for Claude Code",
       "category": "development"
     },
     {
-      "source": "./git-tookit",
-      "name": "git-dev",
+      "source": "./git",
+      "name": "git",
       "description": "Comprehensive Git Development Workflows Speicializing in Git Operations",
       "category": "productivity"
     }
