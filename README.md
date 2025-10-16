@@ -6,11 +6,11 @@ A collection of [Claude Code plugins](https://www.anthropic.com/news/claude-code
 
 ## Plugins
 
-### claude-dev
+### claude
 
 A meta-development plugin that enables Claude Code to create new slash commands from current workflows, making it easy to capture and reuse common patterns.
 
-### git-toolkit
+### git
 
 Comprehensive Git workflow automation plugin providing slash commands for commit, push, PR creation, worktree management, code review, and more.
 
@@ -21,8 +21,8 @@ Comprehensive Git workflow automation plugin providing slash commands for commit
 /plugin marketplace add https://github.com/yanmxa/claude-code-plugins
 
 # Install individual plugins
-/plugin install claude-dev
-/plugin install git-toolkit
+/plugin install claude
+/plugin install git
 
 # Or browse available plugins
 /plugin marketplace list
