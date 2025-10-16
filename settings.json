@@ -7,5 +7,15 @@
   "alwaysThinkingEnabled": false,
   "feedbackSurveyState": {
     "lastShownTime": 1754274455319
+  },
+  "hooks": {
+    "Notification": [{
+      "matcher": "",
+      "hooks": [{"type": "command", "command": "afplay ~/.claude/configs/hooks/notifications/confirm.mp3"}]
+    }],
+    "Stop": [{
+      "matcher": "",
+      "hooks": [{"type": "command", "command": "afplay ~/.claude/configs/hooks/notifications/success.mp3"}]
+    }]
   }
 }
