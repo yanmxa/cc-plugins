@@ -1,10 +1,10 @@
 ---
-argument-hint: [KUBECONFIG] [SPOKE_KUBECONFIG] [test-case-focus] (optional focus, e.g., RHACM4K-51185)
-description: Run Global Hub QE E2E tests with comprehensive logging for troubleshooting
+argument-hint: [KUBECONFIG] [SPOKE_KUBECONFIG] [test-case-focus] [--monitor-logs=true/false] (optional focus e.g., RHACM4K-51185, optional monitoring flag default=false)
+description: Run Global Hub QE E2E tests with optional real-time log monitoring for troubleshooting
 allowed-tools: [Bash, Read, Write, TodoWrite, Grep]
 ---
 
-Run Global Hub QE E2E test cases with comprehensive logging collection from operator, manager, and agent components for troubleshooting purposes.
+Run Global Hub QE E2E test cases with optional real-time log monitoring from operator, manager, and agent components for troubleshooting purposes.
 
 ## Prerequisites
 
@@ -15,30 +15,33 @@ Run Global Hub QE E2E test cases with comprehensive logging collection from oper
 
 ## Implementation Steps
 
-1. **Create task tracking list**
+1. **Parse arguments and create task tracking list**
+   - Check if 4th argument contains `--monitor-logs=true` or is `true`
+   - Default to `false` if not specified
    - Track progress of log collection and test execution
-   - Monitor each component's status
 
-2. **Collect initial component logs**
+2. **Collect initial component logs (if monitoring enabled)**
+   - Skip this step if `--monitor-logs=false`
    - Capture operator logs: `kubectl logs -n multicluster-global-hub deploy/multicluster-global-hub-operator --tail=500`
    - Capture manager logs: `kubectl logs -n multicluster-global-hub deploy/multicluster-global-hub-manager --tail=500`
    - Capture agent logs from spoke: `kubectl logs -n multicluster-global-hub-agent deploy/multicluster-global-hub-agent --tail=500`
    - Save all logs with timestamps for correlation
 
-3. **Start real-time log monitoring**
-   - Launch background log collection for operator: `kubectl logs -f deploy/multicluster-global-hub-operator`
-   - Launch background log collection for manager: `kubectl logs -f deploy/multicluster-global-hub-manager`
+3. **Start real-time log monitoring (if monitoring enabled)**
+   - Skip this step if `--monitor-logs=false`
+   - Launch background log collection for operator: `kubectl logs -f -n multicluster-global-hub deploy/multicluster-global-hub-operator`
+   - Launch background log collection for manager: `kubectl logs -f -n multicluster-global-hub deploy/multicluster-global-hub-manager`
    - Launch background log collection for agent on spoke cluster
    - Direct output to timestamped log files in `/tmp/`
 
 4. **Execute E2E test case**
    - Set required environment variables:
-     - `KUBECONFIG=$1`: path to global-hub cluster config
-     - `SPOKE_KUBECONFIG=$2`: path to spoke cluster config
-     - `GOPRIVATE=github.com/stolostron`
-     - `SERVICE_TYPE=NODE_PORT`
-   - Run ginkgo test with focus: `ginkgo -v --focus="$3" pkg/test/e2e` (if test case specified)
-   - Run full e2e suite if no focus provided: `ginkgo -v -label-filter='e2e' pkg/test/e2e`
+     - `export KUBECONFIG=$1`: path to global-hub cluster config
+     - `export SPOKE_KUBECONFIG=$2`: path to spoke cluster config
+     - `export SERVICE_TYPE=NODE_PORT` (only for Kind clusters; skip for environments with LoadBalancer support)
+     - `export GOPRIVATE=github.com/stolostron` (if needed for private repos)
+   - Run ginkgo test with focus: `ginkgo -v -timeout=30m -focus="$3" pkg/test/e2e` (if test case specified)
+   - Run full e2e suite if no focus provided: `ginkgo -v -timeout=30m -label-filter='e2e' pkg/test/e2e`
    - Capture test output to timestamped log file
 
 5. **Monitor test execution**
@@ -49,26 +52,30 @@ Run Global Hub QE E2E test cases with comprehensive logging collection from oper
 6. **Analyze results and troubleshoot**
    - Check test outcome (PASSED/FAILED)
    - If failed, extract error messages from test logs
-   - Search operator logs for ERROR patterns and resource conflicts
-   - Look for "Operation cannot be fulfilled" errors indicating concurrency issues
-   - Check manager logs for leader election issues or reconciliation errors
-   - Review agent logs for connectivity or sync problems
-   - Correlate timestamps between component logs and test failures
+   - If monitoring was enabled:
+     - Search operator logs for ERROR patterns and resource conflicts
+     - Look for "Operation cannot be fulfilled" errors indicating concurrency issues
+     - Check manager logs for leader election issues or reconciliation errors
+     - Review agent logs for connectivity or sync problems
+     - Correlate timestamps between component logs and test failures
+   - If monitoring was disabled, only analyze test output
 
 7. **Generate troubleshooting report**
    - Summarize test results with execution time
-   - List all collected log file locations
-   - Extract key errors from each component
-   - Identify root cause based on error patterns:
-     - Resource conflict errors → Operator concurrency issues
-     - Leader election lost → Manager instability
-     - Connection refused → Component communication issues
-     - Timeout errors → Sync or propagation delays
-   - Provide recommendations based on findings
+   - If monitoring was enabled:
+     - List all collected log file locations
+     - Extract key errors from each component
+     - Identify root cause based on error patterns:
+       - Resource conflict errors → Operator concurrency issues
+       - Leader election lost → Manager instability
+       - Connection refused → Component communication issues
+       - Timeout errors → Sync or propagation delays
+     - Provide recommendations based on findings
+   - If monitoring was disabled, provide basic test result summary
 
 8. **Clean up and save artifacts**
-   - Stop background log collection processes
-   - List all generated log files with sizes
+   - If monitoring was enabled, stop background log collection processes
+   - List all generated log files with sizes (if any)
    - Provide summary of findings and next steps
 
 ## Error Pattern Analysis
@@ -90,19 +97,30 @@ All logs use timestamp format: `YYYYMMDD-HHMMSS`
 
 ## Example Usage
 
-Run specific test case:
+Run specific test case without log monitoring:
 ```
 /globalhub:qe-e2e-debug /path/to/global-hub/config /path/to/hub1/config RHACM4K-51185
 ```
 
-Run full e2e suite:
+Run specific test case with log monitoring:
+```
+/globalhub:qe-e2e-debug /path/to/global-hub/config /path/to/hub1/config RHACM4K-51185 --monitor-logs=true
+```
+
+Run full e2e suite without log monitoring:
 ```
 /globalhub:qe-e2e-debug /path/to/global-hub/config /path/to/hub1/config
 ```
 
+Run full e2e suite with log monitoring:
+```
+/globalhub:qe-e2e-debug /path/to/global-hub/config /path/to/hub1/config "" --monitor-logs=true
+```
+
 ## Notes
 
-- Works with Kind clusters using NodePort service type (set `SERVICE_TYPE=NODE_PORT`)
-- Correlates logs across multiple components for root cause analysis
+- `SERVICE_TYPE=NODE_PORT` is only required for Kind clusters; environments with LoadBalancer support don't need this variable
+- Log monitoring (`--monitor-logs=true`) is optional and disabled by default to improve test execution speed
+- Correlates logs across multiple components for root cause analysis when monitoring is enabled
 - Provides actionable troubleshooting recommendations
 - All logs preserved for post-mortem analysis
