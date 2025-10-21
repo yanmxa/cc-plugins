@@ -52,7 +52,27 @@ Audio notifications for command execution feedback.
 
 ## Getting Started
 
-1. Copy to `~/.claude/`
-2. Install ScriptFlow MCP
-3. Configure audio hooks in settings.json
-4. Start using or creating commands
+### Clone the Repository
+
+Clone this repository into your `~/.claude` directory to enable all configurations:
+
+```bash
+# Backup your existing .claude directory if it exists
+mv ~/.claude ~/.claude.backup
+
+# Clone the repository
+git clone -b claude-code-settings https://github.com/yanmxa/cc-plugins.git ~/.claude
+
+# Or if you already have a .claude directory, merge the configs
+cd ~/.claude
+git init
+git remote add origin https://github.com/yanmxa/cc-plugins.git
+git fetch origin claude-code-settings
+git checkout claude-code-settings
+```
+
+### Setup Steps
+
+1. Install ScriptFlow MCP (if not already installed)
+2. Configure audio hooks in [settings.json](settings.json) if desired
+3. Start using the slash commands or create your own
