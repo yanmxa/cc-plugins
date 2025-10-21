@@ -134,33 +134,37 @@ fi
 ### 5. Install Container & Kubernetes Tools
 
 #### 5.1 Docker
-Install Docker CE with compatibility for different CentOS versions:
+Install Docker CE following the official documentation:
 ```bash
-# For CentOS 8, we need to use the CentOS 8 repo (may need archive)
-if [ "$CENTOS_VERSION" -eq 8 ]; then
-    # CentOS 8 is EOL, may need to use vault repos
-    sudo $PKG_MGR config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-elif [ "$CENTOS_VERSION" -eq 9 ]; then
-    # CentOS 9 Stream
-    sudo $PKG_MGR config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-else
-    # CentOS 10+
-    sudo $PKG_MGR config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-fi
+# Remove old/conflicting packages
+sudo $PKG_MGR remove -y docker docker-client docker-client-latest docker-common \
+    docker-latest docker-latest-logrotate docker-logrotate docker-engine podman runc 2>/dev/null || true
 
-# Install Docker
+# Install dnf-plugins-core
+sudo $PKG_MGR install -y dnf-plugins-core
+
+# Add Docker official repository
+sudo $PKG_MGR config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+# Install Docker Engine and components
 sudo $PKG_MGR install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Load kernel modules and start Docker
-sudo modprobe br_netfilter 2>/dev/null || true
-sudo modprobe overlay 2>/dev/null || true
-sudo systemctl start docker
-sudo systemctl enable docker
+# Enable IPv4 forwarding for Docker networking
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo sh -c 'echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf'
 
-# Add current user to docker group
+# Start and enable Docker service
+sudo systemctl enable --now docker
+
+# Add current user to docker group (enables running docker without sudo)
 sudo usermod -aG docker $USER
 
+# Verify installation
 docker --version
+docker compose version
+
+echo "Docker installed successfully!"
+echo "Note: You need to log out and log back in for docker group permissions to take effect."
 ```
 
 #### 5.2 kubectl (Latest Version)
