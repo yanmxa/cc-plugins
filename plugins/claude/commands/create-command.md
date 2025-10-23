@@ -1,77 +1,200 @@
 ---
-argument-hint: "[category/name] or leave empty for auto-detection"
+argument-hint: "[category/name] [--update] or leave empty for interactive creation"
 description: "Extract and save current session workflow as a reusable slash command"
-allowed-tools: [Write, Edit, MultiEdit, Glob, Read]
+allowed-tools: [Write, Edit, Glob, Read, Bash, AskUserQuestion]
 ---
 
-Extract and save the current or most recent session workflow as a reusable slash command file.
+Extract and save the current or most recent session workflow as a reusable slash command file. Supports creating new commands, updating existing ones, and interactive guided creation.
 
 ## Usage Examples
-- `git/draft-pr` - Save as git category, draft-pr command
-- `docker/build-prod` - Save as docker category, build-prod command
-- Leave empty - Auto-detect category and use generic name
+
+- `git/draft-pr` - Create new command from recent workflow
+- `git/commit-push --update` - Update existing command with improvements
+- Leave empty - Interactive mode with guided questions
 
 ## Command Creation Process
 
-1. **Extract Workflow**: Capture the current session's workflow and consolidate into high-level steps
-2. **Generate Path**: Create save path using category/name format in `~/.claude/commands/`
-3. **Create Slash Command**: Write structured markdown with frontmatter metadata
-4. **Add Placeholders**: Replace workflow specifics with argument placeholders
+1. **Determine Mode**:
+   - If `--update` flag: Update existing command
+   - If command name provided: Auto mode - analyze recent workflow
+   - If no arguments: Interactive mode - ask guided questions
+
+2. **Analyze Workflow**: Extract recent session patterns, tool usage, and command sequences
+
+3. **Generate Command File**:
+   - Create at `~/.claude/commands/category/name.md`
+   - Add YAML frontmatter with argument-hint, description, allowed-tools
+   - Write implementation steps consolidating workflow actions
+   - Include usage examples and notes
+
+4. **Update Mode** (when using `--update`):
+   - Read existing command file
+   - Preserve metadata unless workflow significantly changed
+   - Merge or enhance implementation steps
+   - Add newly used tools to allowed-tools list
 
 ## Naming & Location
 
-**Format**: `category/name` → `~/.claude/commands/category/name.md`
+**Format**: `category/name` → command file path
+
+**Personal Commands**: `~/.claude/commands/category/name.md`
+- Available across all projects
+- For individual workflows
+
+**Project Commands**: `./.claude/commands/category/name.md`
+- Shared with team via git
+- For project-specific workflows
 
 **Examples**:
-- `git/draft-pr` → `~/.claude/commands/git/draft-pr.md`
-- `docker/build` → `~/.claude/commands/docker/build.md`
-- `test/run-unit` → `~/.claude/commands/test/run-unit.md`
+- `git/draft-pr` → `~/.claude/commands/git/draft-pr.md` (personal)
+- `docker/build` → `./.claude/commands/docker/build.md` (project)
+- `jira/clone-issue` → `~/.claude/commands/jira/clone-issue.md` (personal)
 
-**Auto-detection** (when no arguments provided):
+**Auto-detection** (interactive mode with no name):
 - Git operations → `git/workflow`
-- Node/npm operations → `node/workflow`
-- Docker operations → `docker/workflow`
+- Node/npm → `node/workflow`
+- Docker → `docker/workflow`
 - Test operations → `test/workflow`
-- Default → `general/workflow`
+- Jira → `jira/workflow`
+- AWS → `aws/workflow`
 
-## Generated Slash Command Structure
+## Command File Structure
 
 ```markdown
 ---
-argument-hint: [describe expected arguments]
-description: Brief description of what this command does
-allowed-tools: [tools actually used in workflow - e.g., Bash, Read, Edit, Write]
+argument-hint: [describe expected arguments and defaults]
+description: Brief action-oriented description
+allowed-tools: [Bash, Read, Write, Edit, etc.]
 ---
 
-Brief description of the command purpose.
+Brief description of command purpose and when to use it.
 
 ## Implementation Steps
 
-1. **Major Step**: Consolidated description with `$ARGUMENTS` placeholders (combine multiple small actions)
-2. **Key Action**: Description with `$1`, `$2` for specific arguments (avoid micro-steps)
-3. **Final Step**: Verification or cleanup (group related actions together)
+1. **Major Action**: Description of what to do (consolidate related actions)
+2. **Next Step**: Clear actionable instruction
+3. **Final Step**: Verification or cleanup
+
+## Usage Examples
+
+- `/category/name arg1` - Example scenario
+- `/category/name --flag` - Another scenario
 
 ## Notes
-- Context about when to use this command
 - Prerequisites or dependencies
-- Related commands or alternatives
+- Related commands
+- Important considerations
 ```
 
-## Argument Handling
+## Interactive Questions
 
-- `$ARGUMENTS` - All arguments passed to command
-- `$1`, `$2`, `$3` - Individual positional arguments
-- Place placeholders where dynamic values should be inserted
+When in interactive mode, ask:
 
-**Example**: 
-Original workflow: "Create PR for feature-auth branch"
-Saved command: "Create PR for `$ARGUMENTS` branch"
+1. **Purpose**: What should this command do?
+   - Automate git operations
+   - Run tests or builds
+   - Manage external services (Jira, AWS, Docker)
+   - Code generation or scaffolding
 
-## Features
+2. **Scope**: Where should this command be available?
+   - Personal use only (save to ~/.claude/commands/)
+   - Share with team (save to ./.claude/commands/ for git tracking)
 
-- **Smart Category Detection**: Analyzes workflow patterns for appropriate categorization
-- **Frontmatter Generation**: Adds appropriate metadata based on tools used
-- **Workflow Consolidation**: Groups small actions into fewer, substantial steps
-- **Argument Placeholder Replacement**: Converts specific values to reusable placeholders
-- **Directory Auto-creation**: Creates category subdirectories as needed
-- **Tool Permission Inference**: Sets allowed-tools based on tools actually used in the workflow
+3. **Tools**: Which tools are needed? (multi-select)
+   - File operations (Read, Write, Edit, Glob)
+   - Shell commands (Bash)
+   - User interaction (AskUserQuestion)
+   - All tools (no restrictions)
+
+4. **Arguments**: How should arguments be handled?
+   - All as single value
+   - Multiple positional arguments
+   - With default values
+   - No arguments needed
+
+## Workflow Extraction
+
+When analyzing recent workflow:
+
+1. **Track Tool Usage**: Identify frequently used tools
+2. **Find Patterns**: Detect repeated action sequences
+3. **Extract Commands**: Capture successful bash commands and operations
+4. **Consolidate Steps**: Group micro-actions into major steps (avoid excessive detail)
+5. **Infer Metadata**: Set appropriate allowed-tools based on actual usage
+
+## Update Mode Details
+
+When updating with `--update` flag:
+
+1. Preserve original description and argument-hint unless workflow changed significantly
+2. Merge new steps with existing implementation steps
+3. Add new tools to allowed-tools if used in recent workflow
+4. Enhance usage examples with recent successful executions
+5. Update notes with lessons learned or edge cases discovered
+
+## Output Format
+
+After creation:
+
+```text
+✅ Command created: /category/name
+   Location: ~/.claude/commands/category/name.md
+   Tools: [list of allowed-tools]
+
+🔍 Usage: /category/name [arguments]
+```
+
+After update:
+
+```text
+✅ Command updated: /category/name
+   Location: ~/.claude/commands/category/name.md
+
+🔄 Changes:
+   - [Summary of what changed]
+```
+
+## Best Practices
+
+**Description**:
+
+- Start with action verb (e.g., "Create", "Run", "Update")
+- Keep under 100 characters
+- Be specific and clear
+
+**Implementation Steps**:
+
+- Consolidate related actions (avoid micro-steps)
+- Use descriptive step names
+- Mention argument usage naturally in descriptions
+- Include verification or error handling
+
+**Allowed Tools**:
+
+- Only list tools actually needed
+- Omit for unrestricted access
+- Use minimal set for security
+
+## Examples
+
+```bash
+# Interactive creation
+/claude:create-command
+
+# Create from recent git workflow
+/claude:create-command git/sync-upstream
+
+# Update existing command with improvements
+/claude:create-command git/commit-push --update
+
+# Create project-specific test command
+/claude:create-command test/e2e-debug
+```
+
+## Notes
+
+- Commands expand to full prompts when invoked
+- Keep focused on one specific workflow
+- Test thoroughly before sharing with team
+- Use `--update` to refine based on real usage
+- Commands run in current working directory context
