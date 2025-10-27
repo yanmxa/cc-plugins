@@ -1,10 +1,10 @@
 {
-  "claude-code-plugins": {
+  "cc-plugins": {
     "source": {
       "source": "git",
       "url": "https://github.com/yanmxa/cc-plugins.git"
     },
-    "installLocation": "/Users/myan/.claude/plugins/marketplaces/claude-code-plugins",
-    "lastUpdated": "2025-10-27T01:21:12.373Z"
+    "installLocation": "/Users/myan/.claude/plugins/marketplaces/cc-plugins",
+    "lastUpdated": "2025-10-27T07:15:41.144Z"
   }
 }

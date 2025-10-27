@@ -25,8 +25,8 @@
     ]
   },
   "enabledPlugins": {
-    "claude@claude-code-plugins": true,
-    "git@claude-code-plugins": true
+    "claude@cc-plugins": true,
+    "git@cc-plugins": true
   },
   "alwaysThinkingEnabled": true,
   "feedbackSurveyState": {
