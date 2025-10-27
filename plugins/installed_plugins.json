@@ -1,5 +1,21 @@
 {
   "version": 1,
   "plugins": {
+    "claude@cc-plugins": {
+      "version": "1.0.3",
+      "installedAt": "2025-10-27T07:16:02.186Z",
+      "lastUpdated": "2025-10-27T07:16:02.186Z",
+      "installPath": "/Users/myan/.claude/plugins/marketplaces/cc-plugins/plugins/claude",
+      "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
+      "isLocal": true
+    },
+    "git@cc-plugins": {
+      "version": "1.0.3",
+      "installedAt": "2025-10-27T07:16:02.186Z",
+      "lastUpdated": "2025-10-27T07:16:02.186Z",
+      "installPath": "/Users/myan/.claude/plugins/marketplaces/cc-plugins/plugins/git",
+      "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
+      "isLocal": true
+    }
   }
 }

@@ -16,3 +16,5 @@ todos/
 history.jsonl
 debug/
 session-env
+plugins/installed_plugins.json
+known_marketplaces.json
