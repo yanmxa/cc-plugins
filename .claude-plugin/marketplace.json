@@ -1,5 +1,5 @@
 {
-  "name": "claude-code-plugins",
+  "name": "cc-plugins",
   "version": "1.0.0",
   "description": "Claude Code Plugins for comprehensive workflow automation with Git, Jira integration, and self-extending commands",
   "owner": {
