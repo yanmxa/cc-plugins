@@ -1,10 +1,10 @@
 {
   "cc-plugins": {
     "source": {
-      "source": "git",
-      "url": "https://github.com/yanmxa/cc-plugins.git"
+      "source": "directory",
+      "path": "/Users/myan/Workspace/ideas/cc-plugins"
     },
-    "installLocation": "/Users/myan/.claude/plugins/marketplaces/cc-plugins",
-    "lastUpdated": "2025-10-27T07:15:41.144Z"
+    "installLocation": "/Users/myan/Workspace/ideas/cc-plugins",
+    "lastUpdated": "2025-11-06T03:47:52.812Z"
   }
 }

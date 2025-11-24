@@ -16,6 +16,14 @@
       "installPath": "/Users/myan/.claude/plugins/marketplaces/cc-plugins/plugins/git",
       "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
       "isLocal": true
+    },
+    "jira-tools@acm-workflows-plugins": {
+      "version": "1.0.0",
+      "installedAt": "2025-11-19T08:01:35.703Z",
+      "lastUpdated": "2025-11-19T08:01:35.703Z",
+      "installPath": "/Users/myan/.claude/plugins/marketplaces/acm-workflows-plugins/Claude/plugins/jira-tools",
+      "gitCommitSha": "ec9a448376b0cf4b1acc7349998b1d81cf981eb9",
+      "isLocal": true
     }
   }
 }
