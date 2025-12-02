@@ -11,8 +11,8 @@
 #   # Full command
 #   ./db-sync.sh \
 #     --remote-ssh user@aws-start-ec2 \
-#     --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \
-#     --local-url "mysql://root:localpass@localhost:3306/shopline_demo_test_2"
+#     --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/<databasename>" \
+#     --local-url "mysql://root:localpass@localhost:3306/<databasename>"
 #
 #   # Using profile
 #   ./db-sync.sh --profile ec2_prod
@@ -150,8 +150,8 @@ Examples:
   # Sync from EC2 to local
   $0 \\
     --remote-ssh user@aws-start-ec2 \\
-    --remote-url "mysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \\
-    --local-url "mysql://root:localpass@localhost:3306/shopline_demo_test_2"
+    --remote-url "mysql://root:testpass123@127.0.0.1:3306/<databasename>" \\
+    --local-url "mysql://root:localpass@localhost:3306/<databasename>"
 
   # Auto-create local if not exists
   $0 \\

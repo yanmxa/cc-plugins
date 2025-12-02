@@ -1,10 +1,10 @@
 ---
-name: rget
+name: fetch-remote
 description: Download files and directories from remote machines via SSH/SCP or HTTP/HTTPS. Use when user mentions downloading from remote server, scp, rsync, fetch files from remote host, or getting files from remote machine. Supports progress display, resume, and auto-extraction.
 allowed-tools: [Bash, Read, Write, Glob, AskUserQuestion]
 ---
 
-# rget - Remote File Download Skill
+# fetch-remote - Remote File Download Skill
 
 Intelligent remote file and directory download tool supporting SSH/SCP, rsync, and HTTP/HTTPS with automatic protocol detection.
 
@@ -475,7 +475,7 @@ Retry? (yes/no):
 
 ## Configuration
 
-**Optional config file** (`~/.rget.conf`):
+**Optional config file** (`~/.fetch-remote.conf`):
 ```bash
 # Default SSH key
 DEFAULT_SSH_KEY=~/.ssh/id_rsa
@@ -518,8 +518,8 @@ Host backup-server
 **Usage with config:**
 ```bash
 # Just use the host alias
-rget prod:/data/app.log
-rget backup-server:/backups/db.sql.gz
+fetch-remote prod:/data/app.log
+fetch-remote backup-server:/backups/db.sql.gz
 ```
 
 ## Best Practices

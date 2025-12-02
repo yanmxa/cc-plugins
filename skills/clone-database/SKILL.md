@@ -1,18 +1,18 @@
 ---
-name: db-sync
-description: Sync MySQL/PostgreSQL databases from remote servers to local machine. Use when user mentions syncing database from EC2/server to local, copying remote database, or pulling database from remote. Handles backup, download, and restore in one workflow. Supports creating new or overwriting existing local database.
+name: clone-database
+description: Clone MySQL/PostgreSQL databases from remote servers to local machine. Use when user mentions cloning database from EC2/server to local, copying remote database, or pulling database from remote. Handles backup, download, and restore in one workflow. Supports creating new or overwriting existing local database.
 allowed-tools: [Bash, Read, Write, Glob, AskUserQuestion]
 ---
 
-# db-sync - Cross-Machine Database Synchronization
+# clone-database - Remote Database Cloning
 
-One-command database synchronization from remote servers to local machine. Automates: remote backup → download → local restore → output DATABASE_URL.
+One-command database cloning from remote servers to local machine. Automates: remote backup → download → local restore → output DATABASE_URL.
 
 ## When to Use This Skill
 
-- User wants to sync remote database to local
+- User wants to clone remote database to local
 - User mentions "copy database from EC2/server to local"
-- User asks to "pull database from remote"
+- User asks to "pull database from remote" or "clone database"
 - User needs local copy of remote database
 
 ## Core Workflow
@@ -27,25 +27,25 @@ One-command database synchronization from remote servers to local machine. Autom
 
 ## Helper Script
 
-**Location**: `~/.claude/skills/db-sync/scripts/db-sync.sh`
+**Location**: `~/.claude/skills/clone-database/scripts/db-sync.sh`
 
 **Quick usage with DATABASE_URL:**
 ```bash
 # Sync with full URLs
 ./db-sync.sh \
   --remote-ssh user@aws-start-ec2 \
-  --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \
-  --local-url "mysql://root:localpass@localhost:3306/shopline_demo_test_2"
+  --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/<databasename>" \
+  --local-url "mysql://root:localpass@localhost:3306/<databasename>"
 
 # Auto-create local if not exists
 ./db-sync.sh \
   --remote-ssh user@aws-start-ec2 \
-  --remote-url "mysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \
+  --remote-url "mysql://root:testpass123@127.0.0.1:3306/<databasename>" \
   --auto-create-local
 ```
 
 **Natural language with Claude:**
-> "Sync mysql+pymysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2 from aws-start-ec2 to local"
+> "Clone mysql+pymysql://root:testpass123@127.0.0.1:3306/<databasename> from aws-start-ec2 to local"
 
 Claude will parse the request and use the script automatically.
 
@@ -178,17 +178,17 @@ DATABASE_URL="postgresql://${LOCAL_USER}:${LOCAL_PASSWORD}@localhost:${LOCAL_POR
 
 **Output to user:**
 ```
-✓ Sync complete!
+✓ Clone complete!
 
 Database: ${LOCAL_DB_NAME}
 Tables: ${LOCAL_TABLES}
 Size: ${SIZE_MB} MB
 
 DATABASE_URL:
-mysql+pymysql://root:password@localhost:3306/shopline_demo_test_2
+mysql+pymysql://root:password@localhost:3306/<databasename>
 
 Connect:
-mysql -u root -p shopline_demo_test_2
+mysql -u root -p <databasename>
 ```
 
 #### Step 6: Cleanup
@@ -210,11 +210,11 @@ fi
 
 **Ask user:**
 ```
-Local database 'shopline_demo_test_2' already exists.
+Local database '<databasename>' already exists.
 
 What would you like to do?
 [1] Overwrite (drop and recreate)
-[2] Create with new name (e.g., shopline_demo_test_2_new)
+[2] Create with new name (e.g., <databasename>_new)
 [3] Cancel
 ```
 
@@ -232,18 +232,18 @@ What would you like to do?
 
 ### Scenario 1: EC2 MySQL → Local MySQL (Create New)
 
-**User**: "Sync shopline_demo_test_2 from EC2 to local"
+**User**: "Clone <databasename> from EC2 to local"
 
 **Actions**:
 1. SSH to EC2, backup MySQL
 2. Download backup (345 MB compressed)
-3. Create local database `shopline_demo_test_2`
+3. Create local database `<databasename>`
 4. Restore 45 tables
-5. Output: `mysql+pymysql://root:pass@localhost:3306/shopline_demo_test_2`
+5. Output: `mysql+pymysql://root:pass@localhost:3306/<databasename>`
 
 ### Scenario 2: EC2 MySQL → Local MySQL (Overwrite)
 
-**User**: "Sync shopline_demo_test_2 from EC2, overwrite local"
+**User**: "Clone <databasename> from EC2, overwrite local"
 
 **Actions**:
 1. Detect local DB exists
@@ -317,13 +317,13 @@ EC2_PROD_DB_HOST=127.0.0.1
 EC2_PROD_DB_PORT=3306
 EC2_PROD_DB_USER=root
 EC2_PROD_DB_PASSWORD=testpass123
-EC2_PROD_DB_NAME=shopline_demo_test_2
+EC2_PROD_DB_NAME=<databasename>
 
 LOCAL_DB_HOST=localhost
 LOCAL_DB_PORT=3306
 LOCAL_DB_USER=root
 LOCAL_DB_PASSWORD=localpass
-LOCAL_DB_NAME=shopline_demo_test_2
+LOCAL_DB_NAME=<databasename>
 ```
 
 ## Output Format
@@ -331,20 +331,20 @@ LOCAL_DB_NAME=shopline_demo_test_2
 **Success:**
 ```
 ==========================================
-Database Sync Complete ✓
+Database Clone Complete ✓
 ==========================================
 
-Source: user@ec2-host → shopline_demo_test_2
-Destination: localhost → shopline_demo_test_2
+Source: user@ec2-host → <databasename>
+Destination: localhost → <databasename>
 
 Synced: 45 tables | 1.2 GB → 345 MB (compressed)
 Time: 3m 24s | Speed: 8.2 MB/s
 
 DATABASE_URL:
-mysql+pymysql://root:password@localhost:3306/shopline_demo_test_2
+mysql+pymysql://root:password@localhost:3306/<databasename>
 
 Connect:
-mysql -u root -p shopline_demo_test_2
+mysql -u root -p <databasename>
 
 Backup saved:
 ./backups/backup_20251129_143022.sql.gz
@@ -353,7 +353,7 @@ Backup saved:
 ## Usage with Claude Code
 
 **Trigger phrases:**
-- "Sync shopline_demo_test_2 from EC2 to local"
+- "Clone <databasename> from EC2 to local"
 - "Pull database from remote server"
 - "Copy EC2 MySQL to local Mac"
 - "Download remote database to local"

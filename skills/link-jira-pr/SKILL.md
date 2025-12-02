@@ -1,10 +1,10 @@
 ---
-name: jira-pr-link
+name: link-jira-pr
 description: Cross-link Jira issues with GitHub pull requests by adding PR links to Jira comments and Jira links to PR descriptions. Automatically manages issue status transitions (New→In Progress), sprint assignment, and story points. Use when linking PRs to Jira issues, connecting GitHub work to Jira tracking, or automating Jira-GitHub workflow integration.
 allowed-tools: [Bash]
 ---
 
-# Jira-PR Link Skill
+# Link Jira PR Skill
 
 Automate the complete workflow of linking Jira issues with GitHub pull requests, including bidirectional linking, status management, sprint assignment, and story points configuration.
 
@@ -45,19 +45,19 @@ Ensure you have:
 
 ### Step 2: Execute the Script
 
-Run the jira-pr-link script from the skill's scripts directory:
+Run the link-jira-pr script from the skill's scripts directory:
 
 ```bash
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh <ISSUE_KEY> <PR_URL> [STORY_POINTS]
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh <ISSUE_KEY> <PR_URL> [STORY_POINTS]
 ```
 
 **Examples**:
 ```bash
 # Link without story points
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133
 
 # Link with story points
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
 ```
 
 ### Step 3: Parse and Report Results
@@ -118,7 +118,7 @@ The script includes built-in error handling:
 
 ### Example 1: Basic PR-Jira Linking
 ```bash
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133
 ```
 
 **What happens**:
@@ -129,7 +129,7 @@ The script includes built-in error handling:
 
 ### Example 2: PR-Jira Linking with Story Points
 ```bash
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh ACM-26966 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh ACM-26966 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
 ```
 
 **What happens**:
@@ -138,7 +138,7 @@ The script includes built-in error handling:
 
 ### Example 3: Re-running (Idempotent)
 ```bash
-~/.claude/skills/jira-pr-link/scripts/jira-pr-link.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
+~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh ACM-27001 https://github.com/stolostron/multicluster-global-hub/pull/2133 3
 ```
 
 **What happens** (if already linked):

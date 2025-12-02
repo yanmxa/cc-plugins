@@ -10,13 +10,13 @@ Helper scripts for efficient database synchronization.
 # Sync from EC2 to local
 ./db-sync.sh \
   --remote-ssh user@aws-start-ec2 \
-  --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \
-  --local-url "mysql://root:localpass@localhost:3306/shopline_demo_test_2"
+  --remote-url "mysql+pymysql://root:testpass123@127.0.0.1:3306/<databasename>" \
+  --local-url "mysql://root:localpass@localhost:3306/<databasename>"
 
 # Auto-create local database if not exists
 ./db-sync.sh \
   --remote-ssh user@aws-start-ec2 \
-  --remote-url "mysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2" \
+  --remote-url "mysql://root:testpass123@127.0.0.1:3306/<databasename>" \
   --auto-create-local
 ```
 
@@ -29,14 +29,14 @@ REMOTE_DB_HOST=127.0.0.1
 REMOTE_DB_PORT=3306
 REMOTE_DB_USER=root
 REMOTE_DB_PASSWORD=testpass123
-REMOTE_DB_NAME=shopline_demo_test_2
+REMOTE_DB_NAME=<databasename>
 REMOTE_DB_TYPE=mysql
 
 LOCAL_DB_HOST=localhost
 LOCAL_DB_PORT=3306
 LOCAL_DB_USER=root
 LOCAL_DB_PASSWORD=localpass
-LOCAL_DB_NAME=shopline_demo_test_2
+LOCAL_DB_NAME=<databasename>
 LOCAL_DB_TYPE=mysql
 ```
 
@@ -89,7 +89,7 @@ postgres://user:password@host:port/database
 ```bash
 ./db-sync.sh \
   --remote-ssh prod-server \
-  --remote-url "mysql://root:pass@127.0.0.1:3306/shopline_demo_test_2" \
+  --remote-url "mysql://root:pass@127.0.0.1:3306/<databasename>" \
   --auto-create-local
 ```
 
@@ -162,12 +162,12 @@ Database Sync Plan
 
 Source (Remote):
   SSH Host: user@aws-start-ec2
-  Database: shopline_demo_test_2 (mysql)
+  Database: <databasename> (mysql)
   Host: 127.0.0.1:3306
   User: root
 
 Destination (Local):
-  Database: shopline_demo_test_2 (mysql)
+  Database: <databasename> (mysql)
   Host: localhost:3306
   User: root
 
@@ -180,13 +180,13 @@ Options:
 Continue? (yes/no): yes
 
 [1/5] Backing up remote database...
-✓ Remote backup created: backup_shopline_demo_test_2_20251129_143022.sql.gz (345M)
+✓ Remote backup created: backup_<databasename>_20251129_143022.sql.gz (345M)
 
 [2/5] Downloading backup...
-✓ Downloaded to: backups/backup_shopline_demo_test_2_20251129_143022.sql.gz (345M)
+✓ Downloaded to: backups/backup_<databasename>_20251129_143022.sql.gz (345M)
 
 [3/5] Preparing local database...
-✓ Created database: shopline_demo_test_2
+✓ Created database: <databasename>
 
 [4/5] Restoring to local database...
 ✓ Restore completed successfully
@@ -199,15 +199,15 @@ Continue? (yes/no): yes
 Sync Complete! ✓
 ==========================================
 
-Database: shopline_demo_test_2
+Database: <databasename>
 Tables: 45
-Backup: backups/backup_shopline_demo_test_2_20251129_143022.sql.gz
+Backup: backups/backup_<databasename>_20251129_143022.sql.gz
 
 DATABASE_URL:
-mysql+pymysql://root:localpass@localhost:3306/shopline_demo_test_2
+mysql+pymysql://root:localpass@localhost:3306/<databasename>
 
 Connect:
-mysql -h localhost -P 3306 -u root -p shopline_demo_test_2
+mysql -h localhost -P 3306 -u root -p <databasename>
 ```
 
 ## Troubleshooting
@@ -261,6 +261,6 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY 'newpassword';
 
 When using with Claude Code, just say:
 
-**"Sync mysql+pymysql://root:testpass123@127.0.0.1:3306/shopline_demo_test_2 from aws-start-ec2 to local"**
+**"Sync mysql+pymysql://root:testpass123@127.0.0.1:3306/<databasename> from aws-start-ec2 to local"**
 
 Claude will automatically use this script with the db-sync skill!
