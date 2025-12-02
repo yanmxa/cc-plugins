@@ -1,10 +1,10 @@
 ---
-name: pr
-description: Automate creating pull requests - fork repos, create branches, commit changes, and submit PRs. Works in current directory or creates new clone. Idempotent and safe to re-run. Keywords - PR, pull request, fork, contribute, upstream.
+name: create-pr
+description: Automate creating pull requests - fork repos, create branches, commit changes, and submit PRs. Works in current directory or creates new clone. Idempotent and safe to re-run. Keywords - create PR, pull request, fork, contribute, upstream.
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 ---
 
-# PR - Pull Request Automation
+# Create PR - Pull Request Automation
 
 Automate creating pull requests from start to finish.
 

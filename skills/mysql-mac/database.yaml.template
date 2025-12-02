@@ -1,0 +1,25 @@
+# MySQL Database Configuration Template
+# This file will be auto-generated during MySQL setup
+
+database:
+  type: mysql
+  version: "8.0"
+  host: localhost
+  port: 3306
+  user: your_db_user
+  password: your_db_password
+  database: your_db_name
+  charset: utf8mb4
+  collation: utf8mb4_unicode_ci
+
+  # Connection pool settings (optional)
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+  # Additional options
+  options:
+    connect_timeout: 10
+    read_timeout: 30
+    write_timeout: 30

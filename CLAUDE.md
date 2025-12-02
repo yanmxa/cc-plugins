@@ -8,3 +8,5 @@
 
 ## Git Best Practices
 - When committing code, avoid using git add .. Only submit the necessary modified files, excluding unrelated configuration files or other unchanged files.
+- create pr by the pr skill!
+- use jira-admin when with the jira operations

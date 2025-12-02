@@ -1,0 +1,60 @@
+# MySQL Configuration File Template
+# Location: /usr/local/etc/my.cnf (Intel Mac)
+#       or: /opt/homebrew/etc/my.cnf (Apple Silicon Mac)
+
+[mysqld]
+# Basic Settings
+port = 3306
+bind-address = 127.0.0.1  # localhost only (change to 0.0.0.0 for remote access)
+socket = /tmp/mysql.sock
+datadir = /usr/local/var/mysql  # or /opt/homebrew/var/mysql
+
+# Character Set
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+init_connect = 'SET NAMES utf8mb4'
+
+# Connection Settings
+max_connections = 200
+max_connect_errors = 100
+wait_timeout = 600
+interactive_timeout = 600
+
+# Performance Tuning
+innodb_buffer_pool_size = 1G
+innodb_log_file_size = 256M
+innodb_flush_log_at_trx_commit = 2
+innodb_flush_method = O_DIRECT
+
+# Query Cache (deprecated in MySQL 8.0+)
+# query_cache_size = 0
+# query_cache_type = 0
+
+# Logging
+log_error = /usr/local/var/mysql/error.log
+slow_query_log = 1
+slow_query_log_file = /usr/local/var/mysql/slow.log
+long_query_time = 2
+log_queries_not_using_indexes = 0
+
+# Binary Logging (for replication/backup)
+# log_bin = /usr/local/var/mysql/mysql-bin.log
+# binlog_format = ROW
+# expire_logs_days = 7
+
+# Security
+# require_secure_transport = ON  # Enable for SSL/TLS only
+
+[client]
+port = 3306
+socket = /tmp/mysql.sock
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = 64M
+default-character-set = utf8mb4

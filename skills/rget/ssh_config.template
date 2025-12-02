@@ -1,0 +1,45 @@
+# SSH Config Template for rget skill
+# Location: ~/.ssh/config
+# This file allows you to define host aliases for easy remote access
+
+# Example production server
+Host prod
+    HostName prod.example.com
+    User deploy
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+# Example backup server
+Host backup
+    HostName 192.168.1.100
+    User backup
+    Port 22
+    IdentityFile ~/.ssh/backup_key
+
+# Example development server with custom port
+Host dev
+    HostName dev.example.com
+    User developer
+    Port 2222
+    IdentityFile ~/.ssh/dev_key
+
+# Example with jump host (bastion)
+Host internal-server
+    HostName 10.0.1.50
+    User admin
+    ProxyJump bastion.example.com
+    IdentityFile ~/.ssh/internal_key
+
+# Common settings for all hosts
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    TCPKeepAlive yes
+    Compression yes
+
+# Usage examples:
+# scp prod:/path/to/file ./
+# rsync -avz backup:/backups/ ./local-backups/
+# ssh dev
