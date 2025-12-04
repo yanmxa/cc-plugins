@@ -18,3 +18,5 @@ debug/
 session-env
 plugins/installed_plugins.json
 known_marketplaces.json
+plugins/marketplaces
+.vscode/PythonImportHelper-*

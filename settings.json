@@ -34,7 +34,7 @@
   "enabledPlugins": {
     "claude@cc-plugins": true,
     "git@cc-plugins": true,
-    "jira-tools@acm-workflows-plugins": false
+    "jira-tools@acm-workflows-plugins": true
   },
   "alwaysThinkingEnabled": false,
   "feedbackSurveyState": {
