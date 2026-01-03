@@ -20,3 +20,8 @@ plugins/installed_plugins.json
 known_marketplaces.json
 plugins/marketplaces
 .vscode/PythonImportHelper-*
+chrome
+plans/*
+plugins/cache
+telemetry
+stats-cache.json

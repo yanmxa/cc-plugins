@@ -34,9 +34,10 @@
   "enabledPlugins": {
     "claude@cc-plugins": true,
     "git@cc-plugins": true,
-    "jira-tools@acm-workflows-plugins": true
+    "jira-tools@acm-workflows-plugins": true,
+    "gopls-lsp@claude-plugins-official": true
   },
-  "alwaysThinkingEnabled": false,
+  "alwaysThinkingEnabled": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754274455319
   }

@@ -1,29 +1,49 @@
 {
-  "version": 1,
+  "version": 2,
   "plugins": {
-    "claude@cc-plugins": {
-      "version": "1.0.3",
-      "installedAt": "2025-10-27T07:16:02.186Z",
-      "lastUpdated": "2025-10-27T07:16:02.186Z",
-      "installPath": "/Users/myan/.claude/plugins/marketplaces/cc-plugins/plugins/claude",
-      "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
-      "isLocal": true
-    },
-    "git@cc-plugins": {
-      "version": "1.0.3",
-      "installedAt": "2025-10-27T07:16:02.186Z",
-      "lastUpdated": "2025-10-27T07:16:02.186Z",
-      "installPath": "/Users/myan/.claude/plugins/marketplaces/cc-plugins/plugins/git",
-      "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
-      "isLocal": true
-    },
-    "jira-tools@acm-workflows-plugins": {
-      "version": "1.0.0",
-      "installedAt": "2025-11-19T08:01:35.703Z",
-      "lastUpdated": "2025-11-19T08:01:35.703Z",
-      "installPath": "/Users/myan/.claude/plugins/marketplaces/acm-workflows-plugins/Claude/plugins/jira-tools",
-      "gitCommitSha": "ec9a448376b0cf4b1acc7349998b1d81cf981eb9",
-      "isLocal": true
-    }
+    "claude@cc-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/myan/.claude/plugins/cache/cc-plugins/claude/1.0.3",
+        "version": "1.0.3",
+        "installedAt": "2025-10-27T07:16:02.186Z",
+        "lastUpdated": "2025-12-09T12:21:03.541Z",
+        "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
+        "isLocal": true
+      }
+    ],
+    "git@cc-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/myan/.claude/plugins/cache/cc-plugins/git/1.0.3",
+        "version": "1.0.3",
+        "installedAt": "2025-10-27T07:16:02.186Z",
+        "lastUpdated": "2025-12-09T12:21:03.541Z",
+        "gitCommitSha": "4122d3bffecbe7a031b12bc5b7277529d8efff9f",
+        "isLocal": true
+      }
+    ],
+    "jira-tools@acm-workflows-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/myan/.claude/plugins/cache/acm-workflows-plugins/jira-tools/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2025-11-19T08:01:35.703Z",
+        "lastUpdated": "2025-12-09T12:21:03.541Z",
+        "gitCommitSha": "ec9a448376b0cf4b1acc7349998b1d81cf981eb9",
+        "isLocal": true
+      }
+    ],
+    "gopls-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/myan/.claude/plugins/cache/claude-plugins-official/gopls-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2025-12-24T09:26:43.577Z",
+        "lastUpdated": "2025-12-24T09:26:43.577Z",
+        "gitCommitSha": "5e9785425db64fe056c811071845c9f08238d561",
+        "isLocal": true
+      }
+    ]
   }
 }
