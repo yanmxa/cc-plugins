@@ -9,17 +9,35 @@
 
 set -e
 
-# Parse arguments
+# Parse arguments (order-independent)
 if [ $# -lt 2 ]; then
     echo "❌ Error: Missing required arguments"
     echo "Usage: jira-pr-link <issue-key> <pr-url> [story-points]"
     echo "Example: jira-pr-link ACM-25088 https://github.com/stolostron/multicluster-global-hub/pull/2032 3"
+    echo "Note: Arguments can be in any order"
     exit 1
 fi
 
-ISSUE_KEY="$1"
-PR_URL="$2"
-STORY_POINTS="${3:-}"
+ISSUE_KEY=""
+PR_URL=""
+STORY_POINTS=""
+
+for arg in "$@"; do
+    if [[ "$arg" =~ github\.com/.*/pull/[0-9]+ ]]; then
+        PR_URL="$arg"
+    elif [[ "$arg" =~ ^[A-Z]+-[0-9]+$ ]]; then
+        ISSUE_KEY="$arg"
+    elif [[ "$arg" =~ ^[0-9]+$ ]]; then
+        STORY_POINTS="$arg"
+    fi
+done
+
+if [ -z "$ISSUE_KEY" ] || [ -z "$PR_URL" ]; then
+    echo "❌ Error: Could not identify issue key or PR URL from arguments"
+    echo "Issue key format: ACM-12345"
+    echo "PR URL format: https://github.com/owner/repo/pull/number"
+    exit 1
+fi
 
 # Extract repo and PR number from URL
 # Example: https://github.com/stolostron/multicluster-global-hub/pull/2032
