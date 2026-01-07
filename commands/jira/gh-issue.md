@@ -41,7 +41,7 @@ Unified command for all Global Hub Jira operations with intelligent intent detec
 
 **Examples**:
 - `link ACM-27143 ACM-22567` → Auto-detect: Story to Epic = `jira epic add ACM-22567 ACM-27143`
-- `link ACM-27143 https://github.com/.../pull/123` → `~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh`
+- `link ACM-27143 https://github.com/.../pull/123` → `~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh <ISSUE_KEY> <PR_URL> [STORY_POINTS]`
 - `link ACM-27143 blocks ACM-27002` → `jira issue link ACM-27143 ACM-27002 Blocks`
 
 ### QUERY
@@ -54,7 +54,7 @@ Unified command for all Global Hub Jira operations with intelligent intent detec
 **Parse**: Extract operation, PR URLs, issue keys, type, points, priority
 
 **For LINK operation**:
-1. Check if description contains PR URL → Use link-jira-pr skill
+1. Check if description contains PR URL → Call `~/.claude/skills/link-jira-pr/scripts/link-jira-pr.sh <ISSUE_KEY> <PR_URL> [STORY_POINTS]`
 2. Extract two issue keys → Check both types:
    - If one is Epic, other is Story/Task/Bug → `jira epic add <EPIC> <ISSUE>`
    - Otherwise → `jira issue link <ISSUE1> <ISSUE2> <type>`
