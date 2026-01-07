@@ -123,7 +123,7 @@ Update Claude Code settings file with permissions (allow/deny), environment vari
 
 ### Update project-level settings
 ```bash
-/claude/settings '{"permissions":{"allow":["Bash(make:*)"]}}' --project
+/claude:settings '{"permissions":{"allow":["Bash(make:*)"]}}' --project
 ```
 
 ### Show current settings

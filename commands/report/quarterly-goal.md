@@ -84,9 +84,9 @@ Create concise quarterly goal statements following a proven template format. Wit
 
 ## Usage Examples
 
-- `/report/quarterly-goal "AI automation"` - Simple goal statement with 30% default target
-- `/report/quarterly-goal "Migration Stability" --status` - Goal with progress from Jira/GitHub
-- `/report/quarterly-goal "Platform Maintenance" --status` - Auto-categorize work by themes
+- `/report:quarterly-goal "AI automation"` - Simple goal statement with 30% default target
+- `/report:quarterly-goal "Migration Stability" --status` - Goal with progress from Jira/GitHub
+- `/report:quarterly-goal "Platform Maintenance" --status` - Auto-categorize work by themes
 
 ## Template Structure (Simple Mode)
 

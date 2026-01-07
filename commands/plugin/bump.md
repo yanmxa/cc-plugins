@@ -1,5 +1,5 @@
 ---
-argument-hint: "[--major|--minor|--patch] [--marketplace] [version] - Bump plugin version (default: --patch)"
+argument-hint: "[major|minor|patch] [--marketplace] [version] - Bump plugin version (default: patch)"
 description: Detect changed plugins and bump their version in plugin.json
 allowed-tools: [Bash, Read, Edit, Glob]
 ---
@@ -8,9 +8,9 @@ Detect which plugins have been modified and bump their version numbers according
 
 ## Arguments
 
-- `--major` - Bump major version (1.0.0 → 2.0.0)
-- `--minor` - Bump minor version (1.0.0 → 1.1.0)
-- `--patch` - Bump patch version (1.0.0 → 1.0.1) **[default]**
+- `major` - Bump major version (1.0.0 → 2.0.0)
+- `minor` - Bump minor version (1.0.0 → 1.1.0)
+- `patch` - Bump patch version (1.0.0 → 1.0.1) **[default]**
 - `--marketplace` - Also update marketplace cache version
 - `[version]` - Set specific version (e.g., "2.0.0")
 
@@ -20,9 +20,9 @@ Detect which plugins have been modified and bump their version numbers according
 
 Determine bump type from arguments:
 - If specific version provided (e.g., "2.0.0"), use that
-- If `--major`, bump major version
-- If `--minor`, bump minor version
-- If `--patch` or no flag, bump patch version
+- If `major`, bump major version
+- If `minor`, bump minor version
+- If `patch` or no flag, bump patch version
 - Note if `--marketplace` flag is present
 
 ### 2. Detect Changed Plugins
@@ -83,19 +83,19 @@ Output summary of version changes:
 
 ```bash
 # Auto-detect changed plugins, bump patch version (default)
-/plugin:bump-version
+/plugin:bump
 
 # Bump minor version for changed plugins
-/plugin:bump-version --minor
+/plugin:bump minor
 
 # Bump major version
-/plugin:bump-version --major
+/plugin:bump major
 
 # Set specific version
-/plugin:bump-version 2.0.0
+/plugin:bump 2.0.0
 
 # Bump and also update marketplace cache
-/plugin:bump-version --patch --marketplace
+/plugin:bump patch --marketplace
 ```
 
 ## Notes

@@ -9,7 +9,7 @@ Update the image registry or full image URLs for Multicluster Global Hub compone
 ## Implementation Steps
 
 1. **Parse arguments**:
-   - Check if `$ARGUMENTS` contains `--csv` or `csv` flag
+   - Check if `$ARGUMENTS` contains `--csv` flag
    - Extract image specification (registry or full URLs)
    - If registry only (e.g., `quay.io/myan`): Construct full URLs as `$ARGUMENTS/multicluster-global-hub-{operator,manager,agent}:latest`
    - If full URLs: Parse operator, manager, and agent images

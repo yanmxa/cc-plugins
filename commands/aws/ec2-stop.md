@@ -1,5 +1,5 @@
 ---
-argument-hint: "[--profile PROFILE_NAME] (defaults to 'stark')"
+argument-hint: "[profile] (defaults to 'stark')"
 description: List running EC2 instances and interactively select one to stop
 allowed-tools: [Bash, AskUserQuestion]
 ---
@@ -8,7 +8,7 @@ Display all running EC2 instances and allow interactive selection to stop a spec
 
 ## Implementation Steps
 
-1. **Determine AWS Profile**: Use provided `--profile` argument or default to 'stark' profile
+1. **Determine AWS Profile**: Use provided `profile` argument or default to 'stark' profile
 
 2. **Query Running Instances**: Execute AWS CLI to list all running EC2 instances with detailed information:
    - Use `aws ec2 describe-instances --profile <profile> --filters "Name=instance-state-name,Values=running"`
@@ -26,9 +26,9 @@ Display all running EC2 instances and allow interactive selection to stop a spec
 
 ## Usage Examples
 
-- `/aws/ec2-stop` - Stop an EC2 instance using default 'stark' profile
-- `/aws/ec2-stop --profile production` - Stop an EC2 instance in production profile
-- `/aws/ec2-stop --profile dev` - Stop an EC2 instance in dev profile
+- `/aws:ec2-stop` - Stop an EC2 instance using default 'stark' profile
+- `/aws:ec2-stop production` - Stop an EC2 instance in production profile
+- `/aws:ec2-stop dev` - Stop an EC2 instance in dev profile
 
 ## Notes
 

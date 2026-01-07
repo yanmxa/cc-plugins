@@ -1,5 +1,5 @@
 ---
-argument-hint: "[--profile PROFILE_NAME] (defaults to 'stark')"
+argument-hint: "[profile] (defaults to 'stark')"
 description: List stopped EC2 instances and interactively select one to start
 allowed-tools: [Bash, AskUserQuestion]
 ---
@@ -8,7 +8,7 @@ Display all stopped EC2 instances and allow interactive selection to start a spe
 
 ## Implementation Steps
 
-1. **Determine AWS Profile**: Use provided `--profile` argument or default to 'stark' profile
+1. **Determine AWS Profile**: Use provided `profile` argument or default to 'stark' profile
 
 2. **Query Stopped Instances**: Execute AWS CLI to list all stopped EC2 instances with detailed information:
    - Use `aws ec2 describe-instances --profile <profile> --filters "Name=instance-state-name,Values=stopped"`
@@ -29,9 +29,9 @@ Display all stopped EC2 instances and allow interactive selection to start a spe
 
 ## Usage Examples
 
-- `/aws/ec2-start` - Start a stopped EC2 instance using default 'stark' profile
-- `/aws/ec2-start --profile production` - Start a stopped EC2 instance in production profile
-- `/aws/ec2-start --profile dev` - Start a stopped EC2 instance in dev profile
+- `/aws:ec2-start` - Start a stopped EC2 instance using default 'stark' profile
+- `/aws:ec2-start production` - Start a stopped EC2 instance in production profile
+- `/aws:ec2-start dev` - Start a stopped EC2 instance in dev profile
 
 ## Usage Examples
 
