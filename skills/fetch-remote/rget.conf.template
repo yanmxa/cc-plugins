@@ -1,0 +1,97 @@
+# rget Configuration Template
+# Copy to ~/.rget.conf and customize
+
+# ========================================
+# SSH Settings
+# ========================================
+
+# Default SSH key to use
+DEFAULT_SSH_KEY=~/.ssh/id_rsa
+
+# Connection timeout in seconds
+TIMEOUT=30
+
+# Number of connection retries
+RETRY_COUNT=3
+
+# ========================================
+# Download Settings
+# ========================================
+
+# Default download directory
+# If not set, uses current directory
+DOWNLOAD_DIR=~/Downloads
+
+# Preferred download method
+# Options: auto, rsync, scp
+PREFER_METHOD=auto
+
+# Use rsync over scp when possible
+# rsync has better resume support
+PREFER_RSYNC=yes
+
+# ========================================
+# Performance Settings
+# ========================================
+
+# Bandwidth limit in KB/s
+# 0 = unlimited
+# Example: 1024 = 1 MB/s
+BANDWIDTH_LIMIT=0
+
+# Enable compression for transfers
+# Helps on slow networks
+COMPRESSION=yes
+
+# Number of parallel transfers
+# For batch downloads
+PARALLEL_JOBS=4
+
+# ========================================
+# Archive Handling
+# ========================================
+
+# Auto-extract downloaded archives
+# Options: yes, no, ask
+AUTO_EXTRACT=ask
+
+# Supported archive formats:
+# .tar.gz, .tgz, .tar.bz2, .tar.xz, .zip
+
+# Delete archive after successful extraction
+DELETE_AFTER_EXTRACT=no
+
+# ========================================
+# Safety & Verification
+# ========================================
+
+# Confirm before large downloads (in MB)
+# 0 = always confirm, -1 = never confirm
+CONFIRM_THRESHOLD=1024
+
+# Verify file integrity after download
+# Compares file sizes
+VERIFY_DOWNLOAD=yes
+
+# Warn before overwriting existing files
+WARN_OVERWRITE=yes
+
+# ========================================
+# Progress & Logging
+# ========================================
+
+# Show progress bar
+SHOW_PROGRESS=yes
+
+# Show transfer speed
+SHOW_SPEED=yes
+
+# Show ETA (estimated time)
+SHOW_ETA=yes
+
+# Verbose mode (more detailed output)
+VERBOSE=no
+
+# Log downloads to file
+LOG_DOWNLOADS=no
+LOG_FILE=~/.rget.log

@@ -1,5 +1,3 @@
-
-
 # Always ignore sensitive files even in tracked directories
 **/*.key
 **/*.pem
@@ -7,4 +5,30 @@
 **/credentials.*
 **/*_private.*
 **/*_secret.*
+
+# Debug and runtime files
+ide/
+file-history/
+projects/
+shell-snapshots/
+statsig/
+todos/
+history.jsonl
+debug/
+session-env
+chrome
+plans/*
+telemetry
+stats-cache.json
+.vscode
 .claude
+
+# Personal settings (use *.example.json as templates)
+settings.json
+settings.local.json
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/cache/
+plugins/marketplaces/
+plugins/repos/
+plugins/install-counts-cache.json
