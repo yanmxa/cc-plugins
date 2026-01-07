@@ -16,12 +16,18 @@ todos/
 history.jsonl
 debug/
 session-env
-plugins/installed_plugins.json
-known_marketplaces.json
-plugins/marketplaces
-.vscode/PythonImportHelper-*
 chrome
 plans/*
-plugins/cache
 telemetry
 stats-cache.json
+.vscode
+
+# Personal settings (use *.example.json as templates)
+settings.json
+settings.local.json
+plugins/installed_plugins.json
+plugins/known_marketplaces.json
+plugins/cache/
+plugins/marketplaces/
+plugins/repos/
+plugins/install-counts-cache.json
