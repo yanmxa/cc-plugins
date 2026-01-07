@@ -11,7 +11,7 @@ Execute the jira-my-issues.sh script to list and categorize your assigned Jira i
 Run the script with optional time span parameter (defaults to current user via `jira me`):
 
 ```bash
-~/.claude/configs/scriptflow/jira-my-issues.sh "${1:-7d}"
+~/.claude/scripts/jira-my-issues.sh "${1:-7d}"
 ```
 
 The script will:
