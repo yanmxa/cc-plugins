@@ -1,5 +1,5 @@
 ---
-argument-hint: "[major|minor|patch] [--marketplace] [version] - Bump plugin version (default: patch)"
+argument-hint: "[major|minor|patch|version] - Bump plugin version (default: patch)"
 description: Detect changed plugins and bump their version in plugin.json
 allowed-tools: [Bash, Read, Edit, Glob]
 ---
@@ -11,7 +11,6 @@ Detect which plugins have been modified and bump their version numbers according
 - `major` - Bump major version (1.0.0 → 2.0.0)
 - `minor` - Bump minor version (1.0.0 → 1.1.0)
 - `patch` - Bump patch version (1.0.0 → 1.0.1) **[default]**
-- `--marketplace` - Also update marketplace cache version
 - `[version]` - Set specific version (e.g., "2.0.0")
 
 ## Implementation Steps
@@ -23,24 +22,25 @@ Determine bump type from arguments:
 - If `major`, bump major version
 - If `minor`, bump minor version
 - If `patch` or no flag, bump patch version
-- Note if `--marketplace` flag is present
 
 ### 2. Detect Changed Plugins
 
-Find plugins with modifications:
+Find plugins with modifications (excluding cache, repos, marketplaces, installed_plugins.json, known_marketplaces.json):
 
 ```bash
-# Get list of changed files in plugins/ directory
-git diff --name-only HEAD -- plugins/
+# Get list of changed files in plugins/ directory (excluding non-plugin dirs)
+git diff --name-only HEAD -- plugins/ | grep -v -E '^plugins/(cache|repos|marketplaces|installed_plugins|known_marketplaces)'
 
 # Also check staged changes
-git diff --cached --name-only -- plugins/
+git diff --cached --name-only -- plugins/ | grep -v -E '^plugins/(cache|repos|marketplaces|installed_plugins|known_marketplaces)'
 
-# Check untracked files in plugins/
-git ls-files --others --exclude-standard plugins/
+# Check untracked files in plugins/ (excluding non-plugin dirs)
+git ls-files --others --exclude-standard plugins/ | grep -v -E '^plugins/(cache|repos|marketplaces|installed_plugins|known_marketplaces)'
 ```
 
 Extract unique plugin names from changed paths (e.g., `plugins/git/commands/...` → `git`).
+
+**Important**: Only process directories that have `.claude-plugin/plugin.json` - these are the actual plugin sources.
 
 ### 3. Bump Version for Each Changed Plugin
 
@@ -59,12 +59,7 @@ minor: X.Y.Z → X.(Y+1).0
 patch: X.Y.Z → X.Y.(Z+1)
 ```
 
-### 4. Update Marketplace Cache (if --marketplace)
-
-If `--marketplace` flag is set, also update the cached plugin version at:
-`plugins/cache/<marketplace>/<plugin>/<version>/.claude-plugin/plugin.json`
-
-### 5. Report Results
+### 4. Report Results
 
 Output summary of version changes:
 
@@ -93,14 +88,12 @@ Output summary of version changes:
 
 # Set specific version
 /plugin:bump 2.0.0
-
-# Bump and also update marketplace cache
-/plugin:bump patch --marketplace
 ```
 
 ## Notes
 
-- Only bumps plugins under `plugins/` directory (shared plugins)
+- Only bumps source plugins at `plugins/<name>/.claude-plugin/plugin.json`
+- Excludes `plugins/cache/`, `plugins/repos/`, `plugins/marketplaces/` (managed by plugin system)
 - Does not modify custom commands/skills in root `commands/` or `skills/`
 - If no plugins have changes, reports "No plugin changes detected"
 - Version format must be semantic versioning (X.Y.Z)
