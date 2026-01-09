@@ -21,7 +21,7 @@ Automate creating pull requests from start to finish.
 **Basic workflow:**
 ```bash
 # 1. Fork, clone, and create branch
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/01-fork-and-setup.sh \
   owner/repo \
   ~/code \
   1 \
@@ -31,7 +31,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
 # 2. Make your changes (use Edit tool)...
 
 # 3. Auto-commit and create PR
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/03-create-pr.sh \
   main \
   "PR title" \
   "PR description"
@@ -40,9 +40,9 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
 **Current directory mode:**
 ```bash
 cd /path/to/your/repo
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh owner/repo . "" main my-feature
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/01-fork-and-setup.sh owner/repo . "" main my-feature
 # Make changes...
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh main "Fix bug"
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/03-create-pr.sh main "Fix bug"
 ```
 
 ## Scripts
@@ -95,7 +95,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh main "F
 # User request: "Fix version 2.9 to 2.15 in stolostron/multicluster-global-hub"
 
 # Step 1: Setup
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/01-fork-and-setup.sh \
   stolostron/multicluster-global-hub \
   ~/tmp/contribute \
   1 \
@@ -106,7 +106,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
 # ... Edit files to change 2.9 to 2.15 ...
 
 # Step 3: Create PR
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/03-create-pr.sh \
   main \
   "docs: update version from 2.9 to 2.15" \
   "Update documentation links to point to 2.15 instead of 2.9"
@@ -119,7 +119,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
 
 cd /path/to/existing/repo
 
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/01-fork-and-setup.sh \
   owner/repo \
   . \
   "" \
@@ -128,7 +128,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
 
 # Make changes...
 
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/03-create-pr.sh \
   main \
   "Fix issue #123"
 ```
@@ -139,7 +139,7 @@ bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/03-create-pr.sh \
 # Scenario: Your fork is named "hub-of-hubs" but upstream is "multicluster-global-hub"
 # The script automatically detects this and handles it
 
-bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/create-pr/scripts/01-fork-and-setup.sh \
+bash $CLAUDE_PLUGIN_ROOT/skills/create-pr/scripts/01-fork-and-setup.sh \
   stolostron/multicluster-global-hub \
   ~/code \
   1 \

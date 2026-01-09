@@ -22,12 +22,12 @@ Display all open pull requests authored by the current user across all repositor
 
    **For your own PRs:**
    ```bash
-   bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/my-prs/scripts/show-prs.sh
+   bash $CLAUDE_PLUGIN_ROOT/skills/my-prs/scripts/show-prs.sh
    ```
 
    **For PRs requiring your review:**
    ```bash
-   bash $CLAUDE_CURRENT_PLUGIN_DIR/skills/my-prs/scripts/show-prs.sh --require-review
+   bash $CLAUDE_PLUGIN_ROOT/skills/my-prs/scripts/show-prs.sh --require-review
    ```
 
    The script automatically:
