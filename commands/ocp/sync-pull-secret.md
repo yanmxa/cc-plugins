@@ -1,7 +1,7 @@
 ---
-argument-hint: [target-kubeconfig-path] (path to target cluster's kubeconfig file)
-description: Sync current cluster's pull secret to another OpenShift cluster
-allowed-tools: [Bash, Read, Write, TodoWrite]
+argument-hint: "[target-kubeconfig-path]"
+description: "Sync current cluster's pull secret to another OpenShift cluster"
+allowed-tools: ["Bash", "Read", "Write", "TodoWrite"]
 ---
 
 Synchronize the pull secret from the current OpenShift cluster to a target cluster specified by kubeconfig path. This command securely extracts the pull secret from `openshift-config/pull-secret`, cleans metadata to avoid conflicts, and applies it to the target cluster.

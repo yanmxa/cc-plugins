@@ -1,5 +1,5 @@
 ---
-argument-hint: [install|update|uninstall]
+argument-hint: "[install|update|uninstall]"
 description: Install, update, or uninstall Kube Magic - interactive Kubernetes commands with fzf
 allowed-tools: [Bash]
 ---

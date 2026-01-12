@@ -1,7 +1,7 @@
 ---
-argument-hint: [goal-topic] [--status] (e.g., "AI automation", "Migration Stability --status")
-description: Create quarterly goal statements with optional progress tracking from Jira and GitHub
-allowed-tools: [Bash, Write, AskUserQuestion]
+argument-hint: "[goal-topic] [--status]"
+description: "Create quarterly goal statements with optional progress tracking from Jira and GitHub"
+allowed-tools: ["Bash", "Write", "AskUserQuestion"]
 ---
 
 Create concise quarterly goal statements following a proven template format. With `--status` flag, automatically retrieve and organize related work from Jira and GitHub into structured deliverables.
@@ -100,7 +100,7 @@ My goal for this quarter is to use [method/approach] to [accomplish] more than [
 
 When using `--status`, construct JQL queries like:
 ```
-assignee = currentUser()
+assignee = myan
 AND ((created >= 2025-10-01 AND created <= 2025-12-31)
      OR (updated >= 2025-10-01 AND updated <= 2025-12-31))
 AND (summary ~ "keyword1" OR summary ~ "keyword2")
@@ -110,8 +110,8 @@ AND (summary ~ "keyword1" OR summary ~ "keyword2")
 
 When using `--status`, construct GitHub searches like:
 ```
-is:pr author:@me created:2025-10-01..2025-12-31 keyword in:title
-is:pr author:@me created:2025-10-01..2025-12-31 "keyword" in:body
+is:pr author:yanmxa created:2025-10-01..2025-12-31 keyword in:title
+is:pr author:yanmxa created:2025-10-01..2025-12-31 "keyword" in:body
 ```
 
 ## Notes

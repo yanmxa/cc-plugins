@@ -1,5 +1,5 @@
 ---
-argument-hint: [install|uninstall|status]
+argument-hint: "[install|uninstall|status]"
 description: Install ssh-fzf - interactive SSH/SCP commands with fzf
 allowed-tools: [Bash]
 ---

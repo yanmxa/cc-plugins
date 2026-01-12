@@ -1,5 +1,5 @@
 ---
-argument-hint: [KUBECONFIG] [SPOKE_KUBECONFIG] [test-case-focus] [--monitor-logs] (optional focus e.g., RHACM4K-51185, optional monitoring flag default=false)
+argument-hint: "[KUBECONFIG] [SPOKE_KUBECONFIG] [test-case-focus] [--monitor-logs] (optional focus e.g., RHACM4K-51185, optional monitoring flag default=false)"
 description: Run Global Hub QE E2E tests with optional real-time log monitoring for troubleshooting
 allowed-tools: [Bash, Read, Write, TodoWrite, Grep]
 ---

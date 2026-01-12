@@ -1,5 +1,5 @@
 ---
-argument-hint: [operation] [description] - operation: create|update|link|query; description: context and details
+argument-hint: "[operation] [description] - operation: create|update|link|query; description: context and details"
 description: Manage Global Hub Jira issues using jira-administrator agent with predefined defaults
 allowed-tools: Task, Bash, Skill
 ---

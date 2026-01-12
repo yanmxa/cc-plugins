@@ -1,5 +1,5 @@
 ---
-argument-hint: [setting-content] [--project|--user]
+argument-hint: "[setting-content] [--project|--user]"
 description: Update Claude Code settings with permissions, env vars, and announcements
 allowed-tools: [Read, Write, Edit, Bash]
 ---

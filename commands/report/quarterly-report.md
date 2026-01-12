@@ -1,5 +1,5 @@
 ---
-argument-hint: [quarter-year] [optional: guidance/focus]
+argument-hint: "[quarter-year] [optional: guidance/focus]"
 description: Generate a comprehensive quarterly work report with data-driven insights from Jira issues and GitHub PRs
 allowed-tools: [Bash, TodoWrite, Read, Write]
 ---
@@ -26,13 +26,13 @@ Generate a comprehensive quarterly work report with clear structure, data-driven
 2. **Create Task Plan**: Use TodoWrite to track report generation steps (Jira query, PR analysis, metrics calculation, document drafting)
 
 3. **Gather Jira Data**:
-   - Query Jira issues for the quarter (include both created and updated): `jira issue list --jql "assignee = currentUser() AND (created >= <start-date> OR updated >= <start-date>) AND (created <= <end-date> OR updated <= <end-date>)"`
+   - Query Jira issues for the quarter (include both created and updated): `jira issue list --jql "assignee = myan AND (created >= <start-date> OR updated >= <start-date>) AND (created <= <end-date> OR updated <= <end-date>)"`
    - Categorize issues by type based on summary keywords
    - Count total issues and issues by category
 
 4. **Analyze GitHub Contributions**:
-   - Query all PRs for specified repository (include both created and updated): `gh pr list --repo <repo> --search "author:@me (created:<start-date>..<end-date> OR updated:<start-date>..<end-date>)"`
-   - For simpler queries focusing on creation time: `gh pr list --repo <repo> --search "author:@me created:<start-date>..<end-date>"`
+   - Query all PRs for specified repository (include both created and updated): `gh pr list --repo <repo> --search "author:yanmxa (created:<start-date>..<end-date> OR updated:<start-date>..<end-date>)"`
+   - For simpler queries focusing on creation time: `gh pr list --repo <repo> --search "author:yanmxa created:<start-date>..<end-date>"`
    - Count total PRs merged
    - If `$2` mentions AI/productivity/automation: Search PRs containing specific marker phrase in body (e.g., "Claude Code")
    - Identify representative PRs for each major category
@@ -275,15 +275,15 @@ Example: [PR #1793](link) established the foundation for efficient bundle sync a
 When creating filtered links for Jira and GitHub:
 
 **Jira JQL Examples (include both created and updated):**
-- All issues for quarter: `assignee = currentUser() AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD)`
-- Issues for feature: `assignee = currentUser() AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD) AND (summary ~ "keyword" OR summary ~ "keyword2")`
-- By type: `assignee = currentUser() AND type = Bug AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD)`
+- All issues for quarter: `assignee = myan AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD)`
+- Issues for feature: `assignee = myan AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD) AND (summary ~ "keyword" OR summary ~ "keyword2")`
+- By type: `assignee = myan AND type = Bug AND (created >= YYYY-MM-DD OR updated >= YYYY-MM-DD) AND (created <= YYYY-MM-DD OR updated <= YYYY-MM-DD)`
 
 **GitHub Search Examples:**
-- All PRs in quarter (include both created and updated): `is:pr author:@me (created:YYYY-MM-DD..YYYY-MM-DD OR updated:YYYY-MM-DD..YYYY-MM-DD)`
-- All PRs created in quarter (simpler): `is:pr author:@me created:YYYY-MM-DD..YYYY-MM-DD`
-- PRs for feature: `is:pr author:@me created:YYYY-MM-DD..YYYY-MM-DD keyword in:title`
-- AI-assisted: `is:pr author:@me created:YYYY-MM-DD..YYYY-MM-DD "Claude Code" in:body`
+- All PRs in quarter (include both created and updated): `is:pr author:yanmxa (created:YYYY-MM-DD..YYYY-MM-DD OR updated:YYYY-MM-DD..YYYY-MM-DD)`
+- All PRs created in quarter (simpler): `is:pr author:yanmxa created:YYYY-MM-DD..YYYY-MM-DD`
+- PRs for feature: `is:pr author:yanmxa created:YYYY-MM-DD..YYYY-MM-DD keyword in:title`
+- AI-assisted: `is:pr author:yanmxa created:YYYY-MM-DD..YYYY-MM-DD "Claude Code" in:body`
 
 ## Conditional Content Based on Guidance
 

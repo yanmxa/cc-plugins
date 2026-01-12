@@ -1,5 +1,5 @@
 ---
-argument-hint: [registry or full-image-urls] [--csv]
+argument-hint: "[registry or full-image-urls] [--csv]"
 description: Update MGH component images and restart operator, manager, and agent pods
 allowed-tools: [Bash, Read, Edit]
 ---

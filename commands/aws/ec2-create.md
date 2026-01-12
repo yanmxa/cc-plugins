@@ -1,5 +1,5 @@
 ---
-argument-hint: [ami-name] [instance-type] [disk-size-gb] [key-name] (optional arguments)
+argument-hint: "[ami-name] [instance-type] [disk-size-gb] [key-name] (optional arguments)"
 description: Create an AWS EC2 instance with customizable AMI, instance type, disk size, and key pair
 allowed-tools: [Bash, TodoWrite]
 ---

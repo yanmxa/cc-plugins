@@ -34,3 +34,7 @@ plugins/cache/
 plugins/marketplaces/
 plugins/repos/
 plugins/install-counts-cache.json
+node_modules
+bun.lock
+transcripts
+.opencode

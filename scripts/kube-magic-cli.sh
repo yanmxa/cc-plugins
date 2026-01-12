@@ -43,7 +43,7 @@ do_install() {
   echo ""
   echo "Run 'source ~/.zshrc' or open a new terminal to activate."
   echo ""
-  echo "Available commands: k, ns, ct, exe, log, pod, svc, deploy, secret, cm, event, node, crd, ing, pvc, job"
+  echo "Available commands: k, ns, ct, exe, log, pod, svc, deploy, secret, cm, event, nodes, crd, ing, pvc, job"
 }
 
 do_update() {
@@ -125,7 +125,7 @@ preview_content() {
       echo "  secret   - View/decode secrets"
       echo "  cm       - Manage configmaps"
       echo "  event    - View events"
-      echo "  node     - Manage nodes"
+      echo "  nodes    - Manage nodes"
       echo "  crd      - Browse CRDs"
       echo "  ing      - Manage ingress"
       echo "  pvc      - Manage PVCs"

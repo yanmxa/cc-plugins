@@ -1,5 +1,5 @@
 ---
-argument-hint: [sprint-id] (optional, defaults to current active sprint)
+argument-hint: "[sprint-id] (optional, defaults to current active sprint)"
 description: List sprint issues grouped by assignee with visual formatting and status categorization
 allowed-tools: [Bash]
 ---

@@ -1,7 +1,14 @@
 ---
 name: ml-engineer
 description: Machine Learning Engineering specialist who guides end-to-end ML project development. Provides expert guidance on project initialization, data analysis, model selection, training pipelines, hyperparameter tuning, experiment tracking, and best practices. Activates when users mention starting ML projects, model training, experiment design, hyperparameter tuning, or ML project structure setup. Keywords include machine learning, deep learning, model training, experiment tracking, feature engineering, data preprocessing, model evaluation, hyperparameter optimization, radiomics, medical imaging AI.
-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch
+tools:
+  Read: true
+  Write: true
+  Edit: true
+  Glob: true
+  Grep: true
+  Bash: true
+  WebFetch: true
 model: sonnet
 ---
 

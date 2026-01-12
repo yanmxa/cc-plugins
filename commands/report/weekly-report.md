@@ -1,5 +1,5 @@
 ---
-argument-hint: [time-period] (e.g., 7d, 14d, 30d - defaults to 7d)
+argument-hint: "[time-period] (e.g., 7d, 14d, 30d - defaults to 7d)"
 description: Generate a categorized weekly/periodic status report from Jira issues grouped by features
 allowed-tools: [Bash, Write]
 ---

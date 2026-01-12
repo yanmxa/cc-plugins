@@ -64,7 +64,7 @@ k() {
     echo -e "  ${D}│${R} ${G}job${R} [-A]    ${D}│${R} Manage jobs            ${D}│${R} ${M}L${R}:logs                                     ${D}│${R}"
     echo -e "  ${D}│${R} ${G}event${R} [-A]  ${D}│${R} View events            ${D}│${R} -                                          ${D}│${R}"
     echo -e "  ${D}├─────────────┼────────────────────────┼────────────────────────────────────────────┤${R}"
-    echo -e "  ${D}│${R} ${G}node${R}        ${D}│${R} Manage nodes           ${D}│${R} ${M}T${R}:top ${M}P${R}:pods ${M}O${R}:cordon ${M}U${R}:uncordon           ${D}│${R}"
+    echo -e "  ${D}│${R} ${G}nodes${R}       ${D}│${R} Manage nodes           ${D}│${R} ${M}T${R}:top ${M}P${R}:pods ${M}O${R}:cordon ${M}U${R}:uncordon           ${D}│${R}"
     echo -e "  ${D}│${R} ${G}crd${R} [type]  ${D}│${R} Browse CRDs            ${D}│${R} ${Y}Enter${R}:browse                               ${D}│${R}"
     echo -e "  ${D}╰─────────────┴────────────────────────┴────────────────────────────────────────────╯${R}"
     echo ""
@@ -483,8 +483,8 @@ event() {
     --preview 'echo "Type: {3}\nReason: {4}\nObject: {5}"' "$@"
 }
 
-# node - Manage nodes
-node() {
+# nodes - Manage nodes
+nodes() {
   FZF_DEFAULT_COMMAND="kubectl get nodes -o wide" \
     fzf $(_kube_fzf_opts) --tmux 100%,90% --header-lines=1 \
     --border-label="╢ Nodes ╟" \

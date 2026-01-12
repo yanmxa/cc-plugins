@@ -62,9 +62,9 @@ Extract and save the current or most recent session workflow as a reusable slash
 
 ```markdown
 ---
-argument-hint: [describe expected arguments and defaults]
-description: Brief action-oriented description
-allowed-tools: [Bash, Read, Write, Edit, etc.]
+argument-hint: "[describe expected arguments]"
+description: "Brief action-oriented description"
+allowed-tools: ["Bash", "Read", "Write", "Edit"]
 ---
 
 Brief description of command purpose and when to use it.
@@ -198,3 +198,4 @@ After update:
 - Test thoroughly before sharing with team
 - Use `--update` to refine based on real usage
 - Commands run in current working directory context
+- **YAML format**: Quote values containing special characters `[]():'`, use `["A", "B"]` array format for strict parsing
