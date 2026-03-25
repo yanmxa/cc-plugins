@@ -40,12 +40,12 @@ transcripts
 .opencode
 
 # Personal config (not published as plugins)
-backups/
-commands/
-hooks/
-package.json
-plugins/blocklist.json
-sessions/
-skills/
-tasks/
-teams/
+/backups/
+/commands/
+/hooks/
+/package.json
+/plugins/blocklist.json
+/sessions/
+/skills/
+/tasks/
+/teams/
