@@ -116,14 +116,33 @@ Active plugins configured in `settings.json`:
 
 ### Git Best Practices
 - Avoid `git add .`; only commit necessary modified files
+- **Always sign-off commits** using `git commit -s` or `--signoff` flag
 - Create PRs using the `/pr` skill
 - Use `jira-tools:jira-administrator` agent for Jira operations
+
+### Email Operations Best Practices
+- **NEVER send emails directly without user preview** - Always use `visible:true` to open draft for review
+- **Email workflow**: Draft → User Preview → User Manual Send
+- When composing emails via AppleScript:
+  - Use `visible:true` parameter to show draft window
+  - Do NOT use `send` command - let user click send button manually
+  - For replies/forwards with attachments: open original email for manual attachment copying
+- **Attachment handling**:
+  - AppleScript cannot programmatically copy email attachments
+  - Always open source email and let user drag-drop attachments to draft
+  - For emails with attachments, create draft first, then open source for manual copying
+- **Email commands**:
+  - `/email:digest` - Generate email digest with action items
+  - `/email:reply` - Draft reply (opens preview, never auto-sends)
+  - `/email:view` - View email content
+  - `/email:mark` - Mark emails as read/unread/flagged
 
 ## Settings Configuration
 
 Key settings in `settings.json`:
 - Always thinking enabled
-- Notification hooks: Audio feedback on Notification and Stop events
+- Notification hooks: Audio + Discord DM on Notification and Stop events
+- **Task Summary for Discord**: Before finishing a task, write a brief one-line summary to `/tmp/claude-task-summary.md` (e.g., `echo "Fixed login bug in auth.ts" > /tmp/claude-task-summary.md`). The Stop hook reads this file and includes it in the Discord notification. Only do this for substantive tasks, not casual conversations.
 - Auto-allowed commands: `jira sprint:*`, `jira me:*`, `git add:*`, `git push:*`
 
 ## Development Notes
