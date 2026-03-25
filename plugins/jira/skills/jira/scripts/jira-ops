@@ -1,0 +1,449 @@
+#!/bin/bash
+# jira-ops — A CLI for Jira Cloud REST API v3
+#
+# https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
+
+set -euo pipefail
+
+readonly JIRA_OPS_VERSION="1.2.0"
+
+# Resolve real path (follows symlinks) and source the library
+_SELF="${BASH_SOURCE[0]}"
+[[ -L "$_SELF" ]] && _SELF="$(readlink "$_SELF")"
+readonly JIRA_OPS_CLI_DIR="$(cd "$(dirname "$_SELF")" && pwd)"
+source "${JIRA_OPS_CLI_DIR}/jira-ops.sh"
+
+# ── Global flags ─────────────────────────────────────────────
+JIRA_OPS_JSON=false
+
+# ── Formatting ───────────────────────────────────────────────
+readonly _B='\033[1m'     # bold
+readonly _D='\033[2m'     # dim
+readonly _U='\033[4m'     # underline
+readonly _N='\033[0m'     # reset
+
+# ── Usage ────────────────────────────────────────────────────
+usage() {
+    echo -e "${_B}jira-ops${_N} — Jira Cloud REST API v3 CLI (v${JIRA_OPS_VERSION})
+
+${_U}Usage:${_N}
+  jira-ops [--json] <resource> <action> [arguments]
+
+${_U}Global Flags:${_N}
+  --json              Output raw JSON (for scripting and piping)
+
+${_U}Issue Commands:${_N}
+  issue get       <key> [fields]           Show issue details
+  issue search    <jql> [fields] [max]     Search with JQL
+  issue create    <json-payload>           Create issue (prints key)
+  issue update    <key> <json-payload>     Update issue fields
+  issue delete    <key>                    Delete issue (with confirmation)
+  issue get-field <key> <field-name>       Get a field value by display name
+  issue set-field <key> <field-name> <val> Set a field value by display name
+
+${_U}Workflow Commands:${_N}
+  issue transition  <key> <status>        Transition issue to status
+  issue transitions <key>                 List available transitions
+
+${_U}Relation Commands:${_N}
+  issue link     <type> <from-key> <to-key>    Link two issues
+  issue comment  <key> <text>                  Add a comment
+  issue comment-delete <key> <comment-id>      Delete a comment
+  issue remote-link <key> <url> <title>        Attach external URL (PR/MR)
+
+${_U}Sprint Commands:${_N}
+  board list    <project-key> [max]       List boards for a project
+  sprint list   <board-id>                List active sprints
+  sprint issues <sprint-id> [fields] [max]  List issues in a sprint
+  sprint move   <sprint-id> <keys...>     Move issues to a sprint
+
+${_U}Field Commands:${_N}
+  field discover                          Discover and cache all fields
+  field search  <pattern>                 Search field names (regex)
+  field get     <name>                    Get field ID by display name
+
+${_U}Other:${_N}
+  version                                Print version
+  help                                   Show this help
+
+${_U}Environment Variables:${_N}
+  JIRA_USER        ${_D}Atlassian account email (required)${_N}
+  JIRA_API_TOKEN   ${_D}API token from id.atlassian.com (required)${_N}
+  JIRA_BASE_URL    ${_D}Instance URL, e.g. https://your-domain.atlassian.net (required)${_N}
+  JIRA_AUTH_TYPE   ${_D}Auth mode: basic-header (default), basic, bearer${_N}
+
+${_U}Quick Start:${_N}
+  export JIRA_USER=\"you@company.com\"
+  export JIRA_API_TOKEN=\"your-token\"
+  export JIRA_BASE_URL=\"https://your-domain.atlassian.net\"
+  jira-ops issue get ACM-123
+
+${_U}Examples:${_N}
+  jira-ops issue get ACM-123
+  jira-ops issue get ACM-123 --json
+  jira-ops --json issue search 'project = ACM' key,summary,status 10
+  jira-ops issue get-field ACM-123 \"Story Points\"
+  jira-ops issue set-field ACM-123 \"Story Points\" 5
+  jira-ops issue set-field ACM-123 summary \"New title\"
+  jira-ops issue transition ACM-123 \"In Progress\"
+  jira-ops sprint list 2697
+  jira-ops field search \"story\""
+    exit "${1:-0}"
+}
+
+# ── Helpers ──────────────────────────────────────────────────
+die() { echo -e "${_JO_RED}Error: $*${_JO_NC}" >&2; exit 1; }
+
+need_args() {
+    local need="$1" have="$2" usage_hint="$3"
+    if [[ "$have" -lt "$need" ]]; then
+        echo -e "${_U}Usage:${_N} jira-ops ${usage_hint}" >&2
+        exit 1
+    fi
+}
+
+check_env() {
+    local missing=()
+    [[ -z "${JIRA_USER:-}" ]]      && missing+=("JIRA_USER")
+    [[ -z "${JIRA_API_TOKEN:-}" ]] && missing+=("JIRA_API_TOKEN")
+    [[ -z "${JIRA_BASE_URL:-}" ]]  && missing+=("JIRA_BASE_URL")
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        die "Missing environment variable(s): ${missing[*]}\n  Run 'jira-ops help' for details."
+    fi
+}
+
+# Resolve a field name to its API field key.
+# Built-in fields (summary, status, etc.) pass through as-is.
+# Custom fields (Story Points, Sprint, etc.) get mapped via field-mapping.json.
+resolve_field() {
+    local name="$1"
+    # Built-in fields that don't need mapping
+    case "$name" in
+        summary|status|issuetype|priority|assignee|reporter|components|\
+        description|parent|labels|fixVersions|resolution|created|updated)
+            echo "$name"
+            return
+            ;;
+    esac
+    # Try custom field mapping
+    jira_field_id "$name"
+}
+
+# Detect value type and build JSON for jira_update_issue.
+# Numbers → number, "true"/"false" → bool, else → string.
+build_field_value() {
+    local value="$1"
+    if [[ "$value" =~ ^-?[0-9]+\.?[0-9]*$ ]]; then
+        echo "$value"  # number
+    elif [[ "$value" == "true" || "$value" == "false" ]]; then
+        echo "$value"  # boolean
+    else
+        jq -n --arg v "$value" '$v'  # quoted string
+    fi
+}
+
+format_issues() {
+    if [[ "$JIRA_OPS_JSON" == true ]]; then
+        echo "$RESPONSE_BODY" | jq .
+        return
+    fi
+    local count
+    count=$(echo "$RESPONSE_BODY" | jq '.issues | length')
+    if [[ "$count" -eq 0 ]]; then
+        echo "No issues found."
+        return
+    fi
+    printf "${_B}%-14s  %-14s  %s${_N}\n" "KEY" "STATUS" "SUMMARY"
+    printf "%-14s  %-14s  %s\n" "──────────────" "──────────────" "──────────────────────────────"
+    echo "$RESPONSE_BODY" | jq -r '.issues[] | [.key, .fields.status.name, .fields.summary] | @tsv' | \
+    while IFS=$'\t' read -r key status summary; do
+        printf "%-14s  %-14s  %s\n" "$key" "$status" "$summary"
+    done
+    local total
+    total=$(echo "$RESPONSE_BODY" | jq '.total // empty')
+    [[ -n "$total" ]] && echo -e "\n${_D}Showing ${count} of ${total} results${_N}" || true
+}
+
+format_issue() {
+    if [[ "$JIRA_OPS_JSON" == true ]]; then
+        echo "$RESPONSE_BODY" | jq .
+        return
+    fi
+    echo "$RESPONSE_BODY" | jq -r '
+        "Key:        \(.key)",
+        "Type:       \(.fields.issuetype.name // "N/A")",
+        "Summary:    \(.fields.summary // "N/A")",
+        "Status:     \(.fields.status.name // "N/A")",
+        "Assignee:   \(.fields.assignee.displayName // "(unassigned)")",
+        "Parent:     \(.fields.parent.key // "(none)")",
+        "Components: \([.fields.components[]?.name] | if length == 0 then "(none)" else join(", ") end)"
+    '
+}
+
+# ── Parse global flags ───────────────────────────────────────
+args=()
+for arg in "$@"; do
+    case "$arg" in
+        --json) JIRA_OPS_JSON=true ;;
+        *)      args+=("$arg") ;;
+    esac
+done
+set -- "${args[@]+"${args[@]}"}"
+
+# ── Dispatch ─────────────────────────────────────────────────
+[[ $# -eq 0 ]] && usage
+
+resource="$1"; shift
+
+case "$resource" in
+
+# ── issue ────────────────────────────────────────────────────
+issue)
+    [[ $# -eq 0 ]] && die "Missing action. Run 'jira-ops help' for usage."
+    check_env
+    action="$1"; shift
+
+    case "$action" in
+        get)
+            need_args 1 $# "issue get <key> [fields]"
+            jira_get_issue "$1" "${2:-summary,status,issuetype,parent,assignee,components}"
+            format_issue
+            ;;
+        search)
+            need_args 1 $# "issue search <jql> [fields] [max]"
+            jira_search "$1" "${2:-key,summary,status}" "${3:-20}"
+            format_issues
+            ;;
+        create)
+            need_args 1 $# "issue create <json-payload>"
+            key=$(jira_create_issue "$1")
+            echo "$key"
+            ;;
+        update)
+            need_args 2 $# "issue update <key> <json-payload>"
+            jira_update_issue "$1" "$2"
+            echo "Updated $1"
+            ;;
+        delete)
+            need_args 1 $# "issue delete <key>"
+            read -rp "Delete $1 permanently? [y/N] " confirm
+            [[ "$confirm" =~ ^[yY] ]] || { echo "Cancelled."; exit 0; }
+            jira_delete_issue "$1"
+            echo "Deleted $1"
+            ;;
+
+        get-field)
+            need_args 2 $# "issue get-field <key> <field-name>"
+            local_key="$1"
+            field_name="$2"
+            field_key=$(resolve_field "$field_name")
+
+            jira_get_issue "$local_key" "$field_key"
+
+            if [[ "$JIRA_OPS_JSON" == true ]]; then
+                echo "$RESPONSE_BODY" | jq ".fields.${field_key}"
+            else
+                # Smart display: handle nested objects (status.name, assignee.displayName, etc.)
+                display=$(echo "$RESPONSE_BODY" | jq -r "
+                    .fields.${field_key} |
+                    if type == \"object\" then
+                        (.name // .displayName // .key // tostring)
+                    elif type == \"array\" then
+                        [.[] | if type == \"object\" then (.name // .displayName // .key // tostring) else tostring end] | join(\", \")
+                    elif . == null then
+                        \"(none)\"
+                    else
+                        tostring
+                    end
+                ")
+                echo "${field_name}: ${display}"
+            fi
+            ;;
+
+        set-field)
+            need_args 3 $# "issue set-field <key> <field-name> <value>"
+            local_key="$1"
+            field_name="$2"
+            field_value="$3"
+            field_key=$(resolve_field "$field_name")
+
+            json_value=$(build_field_value "$field_value")
+            payload=$(jq -n --arg k "$field_key" --argjson v "$json_value" '{fields: {($k): $v}}')
+            jira_update_issue "$local_key" "$payload"
+            echo "${local_key}: ${field_name} → ${field_value}"
+            ;;
+
+        transition)
+            need_args 2 $# "issue transition <key> <status>"
+            jira_transition "$1" "$2"
+            echo "$1 → $2"
+            ;;
+        transitions)
+            need_args 1 $# "issue transitions <key>"
+            jira_get_transitions "$1"
+            if [[ "$JIRA_OPS_JSON" == true ]]; then
+                echo "$RESPONSE_BODY" | jq .
+            else
+                printf "${_B}%-6s  %s${_N}\n" "ID" "STATUS"
+                echo "$RESPONSE_BODY" | jq -r '.transitions[] | "\(.id)\t\(.name)"' | \
+                while IFS=$'\t' read -r tid tname; do
+                    printf "%-6s  %s\n" "$tid" "$tname"
+                done
+            fi
+            ;;
+        link)
+            need_args 3 $# "issue link <type> <from-key> <to-key>"
+            jira_link_issues "$1" "$2" "$3"
+            echo "Linked $2 —[$1]→ $3"
+            ;;
+        comment)
+            need_args 2 $# "issue comment <key> <text>"
+            comment_adf=$(adf_doc "[$(adf_paragraph "$2")]")
+            jira_add_comment "$1" "$comment_adf"
+            echo "Comment added to $1"
+            ;;
+        comment-delete)
+            need_args 2 $# "issue comment-delete <key> <comment-id>"
+            jira_delete_comment "$1" "$2"
+            echo "Comment $2 deleted from $1"
+            ;;
+        remote-link)
+            need_args 3 $# "issue remote-link <key> <url> <title>"
+            jira_add_remote_link "$1" "$2" "$3"
+            echo "Remote link added to $1"
+            ;;
+        *)
+            die "Unknown action: issue $action\n  Run 'jira-ops help' for usage."
+            ;;
+    esac
+    ;;
+
+# ── board ────────────────────────────────────────────────────
+board)
+    [[ $# -eq 0 ]] && die "Missing action. Run 'jira-ops help' for usage."
+    check_env
+    action="$1"; shift
+
+    case "$action" in
+        list)
+            need_args 1 $# "board list <project-key> [max]"
+            jira_get_boards "$1" "${2:-50}"
+            if [[ "$JIRA_OPS_JSON" == true ]]; then
+                echo "$RESPONSE_BODY" | jq .
+            else
+                printf "${_B}%-8s  %-10s  %s${_N}\n" "ID" "TYPE" "NAME"
+                echo "$RESPONSE_BODY" | jq -r '.values[] | "\(.id)\t\(.type)\t\(.name)"' | \
+                while IFS=$'\t' read -r bid btype bname; do
+                    printf "%-8s  %-10s  %s\n" "$bid" "$btype" "$bname"
+                done
+            fi
+            ;;
+        *)
+            die "Unknown action: board $action\n  Available: list"
+            ;;
+    esac
+    ;;
+
+# ── sprint ───────────────────────────────────────────────────
+sprint)
+    [[ $# -eq 0 ]] && die "Missing action. Run 'jira-ops help' for usage."
+    check_env
+    action="$1"; shift
+
+    case "$action" in
+        list)
+            need_args 1 $# "sprint list <board-id>"
+            jira_get_active_sprints "$1"
+            if [[ "$JIRA_OPS_JSON" == true ]]; then
+                echo "$RESPONSE_BODY" | jq .
+            else
+                printf "${_B}%-8s  %-10s  %s${_N}\n" "ID" "STATE" "NAME"
+                echo "$RESPONSE_BODY" | jq -r '.values[] | "\(.id)\t\(.state)\t\(.name)"' | \
+                while IFS=$'\t' read -r sid sstate sname; do
+                    printf "%-8s  %-10s  %s\n" "$sid" "$sstate" "$sname"
+                done
+            fi
+            ;;
+        issues)
+            need_args 1 $# "sprint issues <sprint-id> [fields] [max]"
+            jira_get_sprint_issues "$1" "${2:-key,summary,status}" "${3:-50}"
+            format_issues
+            ;;
+        move)
+            need_args 2 $# "sprint move <sprint-id> <keys...>"
+            sprint_id="$1"; shift
+            jira_move_to_sprint "$sprint_id" "$@"
+            echo "Moved $* → sprint $sprint_id"
+            ;;
+        *)
+            die "Unknown action: sprint $action\n  Available: list, issues, move"
+            ;;
+    esac
+    ;;
+
+# ── field ────────────────────────────────────────────────────
+field)
+    [[ $# -eq 0 ]] && die "Missing action. Run 'jira-ops help' for usage."
+    action="$1"; shift
+
+    case "$action" in
+        discover)
+            check_env
+            jira_discover_fields "${1:-}"
+            ;;
+        search)
+            need_args 1 $# "field search <pattern>"
+            jira_field_search "$1"
+            ;;
+        get)
+            need_args 1 $# "field get <name>"
+            jira_field_id "$1"
+            ;;
+        *)
+            die "Unknown action: field $action\n  Available: discover, search, get"
+            ;;
+    esac
+    ;;
+
+# ── top-level ────────────────────────────────────────────────
+install)
+    _target_dir="${1:-$HOME/.local/bin}"
+    _src="${JIRA_OPS_CLI_DIR}/jira-ops"
+    _dest="${_target_dir}/jira-ops"
+    mkdir -p "$_target_dir"
+    if [[ -e "$_dest" ]]; then
+        if [[ -L "$_dest" && "$(readlink "$_dest")" == "$_src" ]]; then
+            echo "jira-ops already installed at $_dest"
+            exit 0
+        fi
+        echo "Removing existing $_dest"
+        rm -f "$_dest"
+    fi
+    ln -s "$_src" "$_dest"
+    echo "Installed: $_dest -> $_src"
+    if [[ ":$PATH:" != *":${_target_dir}:"* ]]; then
+        echo ""
+        echo "Add to your shell profile:"
+        echo "  export PATH=\"${_target_dir}:\$PATH\""
+    fi
+    ;;
+uninstall)
+    _target_dir="${1:-$HOME/.local/bin}"
+    _dest="${_target_dir}/jira-ops"
+    if [[ -L "$_dest" ]]; then
+        rm -f "$_dest"
+        echo "Uninstalled: $_dest"
+    else
+        echo "jira-ops not found at $_dest"
+    fi
+    ;;
+version|-v|--version)
+    echo "jira-ops v${JIRA_OPS_VERSION}"
+    ;;
+help|-h|--help)
+    usage 0
+    ;;
+*)
+    die "Unknown resource: $resource\n  Available: issue, board, sprint, field, install, uninstall\n  Run 'jira-ops help' for usage."
+    ;;
+esac

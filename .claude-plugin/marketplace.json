@@ -1,7 +1,7 @@
 {
   "name": "cc-plugins",
-  "version": "1.0.0",
-  "description": "Claude Code Plugins for comprehensive workflow automation with Git, Jira integration, and self-extending commands",
+  "version": "2.1.0",
+  "description": "Claude Code Plugins for workflow automation with Git, Jira, and meta-development skills",
   "owner": {
     "name": "Meng Yan",
     "email": "myan@redhat.com"
@@ -17,6 +17,12 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Comprehensive Git Development Workflows Specializing in Git Operations",
+      "category": "productivity"
+    },
+    {
+      "name": "jira",
+      "source": "./plugins/jira",
+      "description": "Jira Cloud REST API v3 CLI and shell library - issue CRUD, JQL search, transitions, sprint management, and ADF builders",
       "category": "productivity"
     }
   ]
