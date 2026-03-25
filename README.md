@@ -1,72 +1,64 @@
-# Claude Code Plugins Collection
+# cc-plugins
 
-> Productivity-focused Claude Code plugins — automate Git, Jira, and meta-development workflows
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin marketplace — install skills to automate Git, Jira, and meta-development workflows directly in your terminal.
 
-A collection of [Claude Code plugins](https://www.anthropic.com/news/claude-code-plugins) that streamline common development tasks.
+## Quick Start
+
+```bash
+# Add marketplace
+/plugin marketplace add https://github.com/yanmxa/cc-plugins
+
+# Install plugins
+/plugin install git
+/plugin install jira
+/plugin install claude
+```
 
 ## Plugins
 
 ### git
 
-Git workflow automation with two skills:
+Automates the full Git workflow — commit/push with DCO sign-off, create PRs (fork + branch + submit), list PRs across repos, squash commits, and batch rebase.
 
-| Skill | Description |
-|-------|-------------|
-| **pr** | Full PR lifecycle — create, list, compact commits, rebase. Includes fork detection, DCO sign-off, and idempotent scripts. |
-| **push** | Commit with sign-off and push to origin. Conventional commit format. |
+```
+Bundled scripts: 01-fork-and-setup.sh, 03-create-pr.sh, show-prs.sh
+```
 
 ### jira
 
-Jira Cloud REST API v3 CLI and shell library:
+Jira Cloud REST API v3 CLI and shell library. Sprint boards, issue CRUD, JQL search, workflow transitions, comments, links, and ADF builders — all from the terminal.
 
-| Skill | Description |
-|-------|-------------|
-| **jira** | Sprint board, issue CRUD, JQL search, workflow transitions, comments, links, and ADF builders. Bundled CLI (`jira-ops`) and sourceable shell library (`jira-ops.sh`). |
+```
+Bundled: jira-ops CLI + jira-ops.sh sourceable library
+```
 
 ### claude
 
-Meta-development plugin for extending Claude Code itself:
+Meta-development plugin for extending Claude Code itself — extract workflows into reusable slash commands or create specialized subagents.
 
-| Skill | Description |
-|-------|-------------|
-| **create-command** | Extract current workflows into reusable slash commands |
-| **create-subagent** | Create specialized subagents with custom instructions |
+## How It Works
 
-## Installation
-
-```bash
-# Add this repository as a plugin marketplace
-/plugin marketplace add https://github.com/yanmxa/cc-plugins
-
-# Install individual plugins
-/plugin install git
-/plugin install jira
-/plugin install claude
-
-# Browse available plugins
-/plugin marketplace list
-```
-
-## Architecture
-
-Skills use `${CLAUDE_SKILL_DIR}` for portable script paths — works both as user-scope skills and installed plugins.
+Each plugin bundles skills with `SKILL.md` definitions and supporting scripts. Skills use `${CLAUDE_SKILL_DIR}` for portable paths, so they work regardless of where Claude Code installs them.
 
 ```
 plugins/
-├── claude/           # Meta-development skills
-├── git/              # PR lifecycle + push
+├── claude/                        # Meta-development
 │   └── skills/
-│       ├── pr/       # create, list, compact, rebase PRs
-│       └── push/     # commit + push with sign-off
-└── jira/             # Jira CLI and shell library
-    └── skills/
-        └── jira/     # Full Jira operations
+│       ├── create-command/
+│       └── create-subagent/
+├── git/                           # Git automation
+│   └── skills/git/
+│       └── scripts/               # Fork, PR, show-prs
+└── jira/                          # Jira operations
+    └── skills/jira/
+        ├── scripts/               # CLI + shell library
+        └── references/            # API docs
 ```
 
 ## Contributing
 
-Contributions welcome! Submit pull requests or open issues for new plugin ideas or improvements.
+PRs and issues welcome.
 
 ## License
 
-MIT License
+MIT
