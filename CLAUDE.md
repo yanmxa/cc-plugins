@@ -47,16 +47,9 @@ skills/               # Custom skills with scripts
 ├── kube:mv/          # Move K8s resources between clusters
 └── link-jira-pr/     # Cross-link Jira issues with GitHub PRs
 
-agents/               # Custom subagents
-└── ml-engineer.md    # Machine Learning Engineering specialist
-
 scripts/              # Shell scripts used by skills/commands
-├── jira-my-issues.sh
 ├── kube-magic.sh
 └── kube-magic-cli.sh
-
-hooks/                # Event hooks
-└── notifications/    # Audio notifications (confirm.mp3, success.mp3)
 ```
 
 ## Plugin Marketplaces

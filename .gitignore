@@ -40,11 +40,13 @@ transcripts
 .opencode
 
 # Personal config (not published as plugins)
+/agents/
 /backups/
 /commands/
 /hooks/
 /package.json
 /plugins/blocklist.json
+/scripts/
 /sessions/
 /skills/
 /tasks/
