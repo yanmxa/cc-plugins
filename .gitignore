@@ -38,3 +38,14 @@ node_modules
 bun.lock
 transcripts
 .opencode
+
+# Personal config (not published as plugins)
+backups/
+commands/
+hooks/
+package.json
+plugins/blocklist.json
+sessions/
+skills/
+tasks/
+teams/
