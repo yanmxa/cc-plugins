@@ -1,7 +1,7 @@
 {
   "name": "cc-plugins",
-  "version": "2.1.0",
-  "description": "Claude Code Plugins for workflow automation with Git, Jira, and meta-development skills",
+  "version": "2.2.0",
+  "description": "Claude Code Plugins for workflow automation with Git, Jira, Dev, and environment setup skills",
   "owner": {
     "name": "Meng Yan",
     "email": "myan@redhat.com"
@@ -24,6 +24,18 @@
       "source": "./plugins/jira",
       "description": "Jira Cloud REST API v3 CLI and shell library - issue CRUD, JQL search, transitions, sprint management, and ADF builders",
       "category": "productivity"
+    },
+    {
+      "name": "dev",
+      "source": "./plugins/dev",
+      "description": "Autonomous development workflows - auto-dev iterative fix loop and auto-research experimentation",
+      "category": "development"
+    },
+    {
+      "name": "setup",
+      "source": "./plugins/setup",
+      "description": "Development environment setup and configuration - tmux and other tool bootstrapping",
+      "category": "setup"
     }
   ]
 }
