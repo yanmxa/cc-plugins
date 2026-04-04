@@ -111,27 +111,32 @@ Execute each sub-problem in order. For each sub-problem:
 
 ## Change Notes
 
-Change notes are written to `.autodev/CHANGE_NOTES.md` (relative to the project root). This file persists across context compressions and serves as your memory throughout the entire loop.
+Each sub-problem gets its own change notes file under `.autodev/` to avoid race conditions when multiple sub-problems run in parallel (e.g., via subagents). The naming convention is:
 
-**Do NOT commit this file.** It is a working document. Do NOT delete it on your own — only clean it up after the user explicitly confirms.
+```
+.autodev/
+├── sub-1-<short-name>.md
+├── sub-2-<short-name>.md
+└── ...
+```
 
 At the start of the task, create the `.autodev/` directory and add `.autodev/` to `.gitignore` if not already present.
+
+**Do NOT commit these files.** They are working documents. Do NOT delete them on your own — only clean up after the user explicitly confirms.
 
 **When to write:**
 - **After initial implementation** — record what you changed and why
 - **After each failed iteration** — append what failed, root cause, and what you fixed
 - **When switching approaches** — append a summary of the failed approach before starting fresh
 
-**Before each fix**, re-read the current sub-problem's section in `CHANGE_NOTES.md` to ensure you're not repeating a failed approach.
+**Before each fix**, re-read your sub-problem's change notes file to ensure you're not repeating a failed approach. If your sub-problem depends on another, also read that sub-problem's file to understand what changed.
 
-**When the file gets large** (after ~10 approach switches on a sub-problem), compress older entries: replace each failed approach's per-iteration details with a one-line summary (e.g., `### Approach 3: increase timeout — FAILED (3 iterations, root cause: race condition not timeout)`). Keep the last 2-3 approaches in full detail.
+**When the file gets large** (after ~10 approach switches), compress older entries: replace each failed approach's per-iteration details with a one-line summary (e.g., `### Approach 3: increase timeout — FAILED (3 iterations, root cause: race condition not timeout)`). Keep the last 2-3 approaches in full detail.
 
-**Format:**
+**Format** (each file):
 
 ```markdown
-# AutoDev Change Notes
-
-## Sub-problem 1: [description]
+# Sub-problem: [description]
 
 ### Approach 1: [brief description of the idea]
 
@@ -154,12 +159,14 @@ At the start of the task, create the `.autodev/` directory and add `.autodev/` t
 - **Changed**: [file:line]: [description]
 - **Result**: pass
 - **Committed**: [short commit hash]
-
----
-
-## Sub-problem 2: [description]
-...
 ```
+
+### Parallel Execution
+
+If sub-problems are independent (no shared files), they can run in parallel via subagents. Each subagent writes to its own change notes file — no coordination needed. However:
+- **If sub-problems modify the same files** → run them sequentially. Parallel edits to the same file will conflict.
+- **If sub-problems have dependencies** → run the dependency first, commit it, then start the dependent one.
+- **Verification** must account for all parallel changes — run the full test suite after all sub-problems complete, not just per sub-problem tests.
 
 ---
 
@@ -208,7 +215,7 @@ Before declaring a sub-problem done:
 - [ ] Changes are committed
 
 After all sub-problems are done:
-- [ ] Ask the user whether to clean up `.autodev/CHANGE_NOTES.md` — do NOT delete on your own
+- [ ] Ask the user whether to clean up `.autodev/` directory — do NOT delete on your own
 
 ---
 
