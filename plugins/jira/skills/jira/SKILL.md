@@ -31,10 +31,12 @@ Outputs a markdown table directly, grouped by status (New -> In Progress -> Reso
 ## create — Create a new issue
 
 ```bash
-scripts/create.sh "<summary>" [type=Task] [priority=Major] [sp=3] [parent=ACM-xxx] [component=Global Hub] [sprint=current]
+scripts/create.sh "<summary>" [type=Task] [priority=Major] [sp=3] [parent=ACM-xxx] [component=Global Hub] [sprint=current] [activity=Product / Portfolio Work]
 ```
 
 Defaults: project=ACM, component=Global Hub, assignee=current user, type=Task.
+
+**When creating an issue, always ask the user to select an Activity Type using AskUserQuestion** (optional — user can skip). Valid values: `Product / Portfolio Work`, `Quality / Stability / Reliability`, `Security & Compliance`, `Incidents & Support`, `Future Sustainability`, `Associate Wellness & Development`.
 
 ## update — Update issue fields
 

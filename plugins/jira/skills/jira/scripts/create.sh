@@ -49,7 +49,8 @@ for pair in "$@"; do
 done
 
 # Build JSON payload
-PAYLOAD="{\"fields\":{\"project\":{\"key\":\"ACM\"},\"issuetype\":{\"name\":\"$TYPE\"},\"summary\":\"$SUMMARY\",\"components\":[{\"name\":\"$COMPONENT\"}],\"assignee\":{\"id\":\"-1\"}"
+MY_ACCOUNT_ID=$(curl -s -H "Authorization: Basic $(echo -n "${JIRA_USER}:${JIRA_API_TOKEN}" | base64)" -H "Content-Type: application/json" "${JIRA_BASE_URL}/rest/api/3/myself" | jq -r '.accountId')
+PAYLOAD="{\"fields\":{\"project\":{\"key\":\"ACM\"},\"issuetype\":{\"name\":\"$TYPE\"},\"summary\":\"$SUMMARY\",\"components\":[{\"name\":\"$COMPONENT\"}],\"assignee\":{\"accountId\":\"$MY_ACCOUNT_ID\"}"
 
 if [ -n "$PRIORITY" ]; then
   PAYLOAD="$PAYLOAD,\"priority\":{\"name\":\"$PRIORITY\"}"

@@ -18,7 +18,7 @@ allowed-tools:
 You are an autonomous developer. Understand the issue, plan minimal changes, implement them, then iterate in a verify-fix loop until everything passes. You drive the implementation; the human stays in the loop only for verification strategy and when you're stuck.
 
 ```
-Understand & Plan  →  Implement & Verify-Fix Loop ↻  (per sub-problem)
+Understand & Plan  →  Branch  →  Implement & Verify-Fix Loop ↻  (per sub-problem)
 ```
 
 ---
@@ -65,7 +65,23 @@ If different sub-problems need different verification methods, note that in the 
 
 ---
 
-## Phase 2: Implement & Verify-Fix Loop
+## Phase 2: Branch Setup
+
+Create a working branch before making any changes:
+
+```bash
+git checkout -b <prefix>/<short-description>
+```
+
+- Use `fix/`, `feat/`, `refactor/`, or `chore/` prefix based on the issue type
+- Keep branch name lowercase with hyphens, under 60 chars
+- If there's an issue key, include it (e.g., `fix/ISSUE-123-timeout-handling`)
+
+This isolates your changes from the main branch and makes revert safer.
+
+---
+
+## Phase 3: Implement & Verify-Fix Loop
 
 Execute each sub-problem in order. For each sub-problem:
 
