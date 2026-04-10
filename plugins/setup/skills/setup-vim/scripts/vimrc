@@ -1,0 +1,74 @@
+" Custom keybindings (IJKL Dvorak-style navigation)
+set norelativenumber
+set cursorline
+set wrap
+set showcmd
+set wildmenu
+set smartindent
+set backspace=2
+
+set hlsearch
+noremap <SPACE><CR> :nohlsearch<CR>
+noremap nn :set nonumber<CR>
+noremap n :set number<CR>
+
+set incsearch
+set ignorecase
+set smartcase
+
+" Navigation: IJKL instead of HJKL
+noremap i k
+noremap I 5k
+
+noremap k j
+noremap K 5j
+
+noremap j h
+" Word jumping
+noremap J B
+noremap L E
+noremap j b
+noremap l e
+
+" Page boundary jumping
+noremap <SPACE>i gg
+noremap <SPACE>k G
+noremap <SPACE>j H
+noremap <SPACE>l L
+
+" Insert mode
+noremap h i
+noremap H I
+
+" Save and quit
+map S :w<CR>
+map Q :q<CR>
+map s <nop>
+
+" Tab = 4 spaces
+set ts=4
+set sw=4
+
+" Window splitting
+map sl :set splitright<CR>:vsplit<CR>
+map sj :set nosplitright<CR>:vsplit<CR>
+map si :set nosplitbelow<CR>:split<CR>
+map sk :set splitbelow<CR>:split<CR>
+
+" vim-plug plugins
+call plug#begin('~/.vim/plugged')
+
+" molokai theme
+Plug 'tomasr/molokai'
+let g:molokai_original = 1
+let g:rehash256 = 1
+
+" syntax support
+Plug 'sheerun/vim-polyglot'
+
+" status bar
+Plug 'vim-airline/vim-airline'
+
+call plug#end()
+
+colorscheme molokai

@@ -1,0 +1,9 @@
+{
+  "name": "server",
+  "description": "Server management - SSH login, file upload/download, and SSH key setup",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "myan@redhat.com"
+  }
+}
