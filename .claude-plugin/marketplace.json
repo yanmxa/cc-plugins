@@ -36,6 +36,12 @@
       "source": "./plugins/setup",
       "description": "Development environment setup and configuration - tmux and other tool bootstrapping",
       "category": "setup"
+    },
+    {
+      "name": "video-downloader",
+      "source": "./plugins/video-downloader",
+      "description": "Download videos from YouTube and other sites using yt-dlp with quality selection, subtitles, and format options",
+      "category": "productivity"
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "name": "video-downloader",
+  "description": "Download videos from YouTube and other sites using yt-dlp",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "myan@redhat.com"
+  }
+}
