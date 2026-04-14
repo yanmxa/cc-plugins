@@ -1,7 +1,10 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "cc-plugins",
-  "version": "2.2.0",
   "description": "Claude Code Plugins for workflow automation with Git, Jira, Dev, and environment setup skills",
+  "metadata": {
+    "version": "2.2.0"
+  },
   "owner": {
     "name": "Meng Yan",
     "email": "myan@redhat.com"
