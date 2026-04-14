@@ -6,15 +6,15 @@ allowed-tools: [Bash, Read, Write, Edit]
 
 # Setup Ghostty
 
-Set up a fully configured Ghostty terminal on macOS with MesloLGS Nerd Font, split pane keybindings, and an optimized config.
+Set up a fully configured Ghostty terminal on macOS with MesloLGL Nerd Font, split pane keybindings, and an optimized config.
 
 ## What gets installed
 
 - **Ghostty** (via Homebrew cask if not present)
-- **MesloLGS Nerd Font** (downloaded from nerd-fonts releases if not found)
+- **MesloLGL Nerd Font** (downloaded from nerd-fonts releases if not found)
 - **Optimized config** with these highlights:
-  - Font: MesloLGS Nerd Font, size 14
-  - Theme: Solarized Light
+  - Font: MesloLGL Nerd Font, size 14
+  - Theme: Builtin Light
   - Split panes: `Cmd+D` (right), `Cmd+Shift+D` (down)
   - Navigate splits: `Cmd+Alt+Arrow`
   - Resize splits: `Cmd+Ctrl+Arrow`

@@ -3,7 +3,7 @@
 # =============================================================
 
 # --- Font ---
-font-family = MesloLGS Nerd Font
+font-family = MesloLGL Nerd Font
 font-style = Regular
 font-style-bold = Bold
 font-style-italic = Italic
@@ -11,13 +11,13 @@ font-style-bold-italic = Bold Italic
 font-size = 14
 
 # --- Theme ---
-theme = Builtin Solarized Light
+theme = Builtin Light
 
 # --- Window ---
 window-padding-x = 16
 window-padding-y = 8
 window-decoration = true
-window-title-font-family = MesloLGS Nerd Font
+window-title-font-family = MesloLGL Nerd Font
 confirm-close-surface = false
 quit-after-last-window-closed = true
 macos-titlebar-style = tabs

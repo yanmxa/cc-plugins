@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR="$HOME/.config/ghostty"
 CONFIG_FILE="$CONFIG_DIR/config"
-FONT_NAME="MesloLGS Nerd Font"
+FONT_NAME="MesloLGL Nerd Font"
 FONT_DIR="$HOME/Library/Fonts"
 
 echo "=== Ghostty Setup ==="
@@ -30,14 +30,14 @@ install_nerd_font() {
   echo "Checking for $FONT_NAME..."
 
   # Check if font is already installed (system or user fonts)
-  if fc-list 2>/dev/null | grep -qi "MesloLGS Nerd Font"; then
+  if fc-list 2>/dev/null | grep -qi "MesloLGL Nerd Font"; then
     echo "$FONT_NAME already installed."
     return 0
   fi
 
   # Fallback: check font files directly
-  if ls "$FONT_DIR"/MesloLGS*.ttf &>/dev/null 2>&1 || \
-     ls /Library/Fonts/MesloLGS*.ttf &>/dev/null 2>&1; then
+  if ls "$FONT_DIR"/MesloLGL*.ttf &>/dev/null 2>&1 || \
+     ls /Library/Fonts/MesloLGL*.ttf &>/dev/null 2>&1; then
     echo "$FONT_NAME already installed."
     return 0
   fi
@@ -53,16 +53,16 @@ install_nerd_font() {
   echo "Extracting fonts..."
   unzip -qo "$ZIP_FILE" -d "$TEMP_DIR/fonts"
 
-  # Install MesloLGS variants to user font directory
+  # Install MesloLGL variants to user font directory
   mkdir -p "$FONT_DIR"
   local count=0
-  for f in "$TEMP_DIR/fonts"/MesloLGS*.ttf; do
+  for f in "$TEMP_DIR/fonts"/MesloLGL*.ttf; do
     [ -f "$f" ] || continue
     cp "$f" "$FONT_DIR/"
     count=$((count + 1))
   done
 
-  # If no MesloLGS found, install all Meslo variants
+  # If no MesloLGL found, install all Meslo variants
   if [ "$count" -eq 0 ]; then
     for f in "$TEMP_DIR/fonts"/*.ttf; do
       [ -f "$f" ] || continue
