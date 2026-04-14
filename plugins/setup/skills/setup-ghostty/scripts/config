@@ -1,0 +1,68 @@
+# =============================================================
+# Ghostty Configuration
+# =============================================================
+
+# --- Font ---
+font-family = MesloLGS Nerd Font
+font-style = Regular
+font-style-bold = Bold
+font-style-italic = Italic
+font-style-bold-italic = Bold Italic
+font-size = 14
+
+# --- Theme ---
+theme = Builtin Solarized Light
+
+# --- Window ---
+window-padding-x = 16
+window-padding-y = 8
+window-decoration = true
+window-title-font-family = MesloLGS Nerd Font
+confirm-close-surface = false
+quit-after-last-window-closed = true
+macos-titlebar-style = tabs
+
+# --- Cursor ---
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = cursor,sudo,title
+
+# --- Clipboard ---
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = clipboard
+
+# --- Mouse ---
+mouse-hide-while-typing = true
+
+# --- Scrollback ---
+scrollback-limit = 50000
+
+# --- Keybindings ---
+# Split panes (like tmux)
+keybind = super+d=new_split:right
+keybind = super+shift+d=new_split:down
+keybind = super+w=close_surface
+
+# Navigate between splits
+keybind = super+alt+left=goto_split:left
+keybind = super+alt+right=goto_split:right
+keybind = super+alt+up=goto_split:top
+keybind = super+alt+down=goto_split:bottom
+
+# Resize splits
+keybind = super+ctrl+left=resize_split:left,20
+keybind = super+ctrl+right=resize_split:right,20
+keybind = super+ctrl+up=resize_split:up,20
+keybind = super+ctrl+down=resize_split:down,20
+
+# Equalize splits
+keybind = super+shift+equal=equalize_splits
+
+# Font size
+keybind = super+equal=increase_font_size:1
+keybind = super+minus=decrease_font_size:1
+keybind = super+0=reset_font_size
+
+# Quick terminal toggle
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
