@@ -1,0 +1,9 @@
+{
+  "name": "go-dev",
+  "description": "Go development toolkit: 6 specialized subagents (go-structure-reviewer, go-developer, go-bug-reviewer, go-security-reviewer, go-perf-developer, go-test-developer) and a multi-phase optimization pipeline (go-optimize) for end-to-end Go code review and improvement",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "myan@redhat.com"
+  }
+}
