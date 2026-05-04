@@ -3,7 +3,7 @@
   "name": "cc-plugins",
   "description": "Claude Code Plugins for workflow automation with Git, Jira, Dev, and environment setup skills",
   "metadata": {
-    "version": "2.3.0"
+    "version": "2.4.0"
   },
   "owner": {
     "name": "Meng Yan",
@@ -37,7 +37,7 @@
     {
       "name": "setup",
       "source": "./plugins/setup",
-      "description": "Development environment setup and configuration - Ghostty, tmux, Neovim, and Zsh bootstrapping",
+      "description": "macOS dev environment bootstrap — Homebrew, Zsh (uv/fnm/Go), Neovim, tmux, Git+gh, Ghostty, Docker (OrbStack), Hysteria2 proxy, system prefs. Modular, multi-select.",
       "category": "setup"
     },
     {

@@ -1,0 +1,28 @@
+# Hysteria 2 客户端配置
+# 文档: https://v2.hysteria.network/docs/getting-started/Client/
+#
+# 此文件 chmod 600，不会被 git 追踪。直接编辑下面的字段即可。
+#
+# 必填三项：
+#   server         你的 Hy2 服务器地址 (host:port)
+#   auth           认证密码 / token
+#   tls.pinSHA256  服务器证书 SHA256 指纹
+
+server: SERVER_HOST:443
+auth: YOUR_AUTH_TOKEN
+
+tls:
+  sni: bing.com                        # SNI 伪装域名
+  insecure: true                       # 跳过标准 CA 验证（self-signed 必填）
+  pinSHA256: YOUR_CERT_SHA256          # 用证书指纹做严格校验
+
+# 本地监听端口
+socks5:
+  listen: 127.0.0.1:1080
+http:
+  listen: 127.0.0.1:1081
+
+# 带宽（设为你的实际网络带宽）
+bandwidth:
+  up: 50 mbps
+  down: 200 mbps

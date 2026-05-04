@@ -1,93 +1,87 @@
 #!/bin/bash
-# Setup Neovim with full Lua config or classic Vim with vim-plug
+# Setup Neovim with kickstart.nvim (community-maintained starter config)
+# or classic Vim with vim-plug as fallback.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-MODE="${1:-all}"  # all, --vim-only, --neovim-only
-MYCONFIG_DIR="$HOME/myconfig"
+MODE="${1:-all}"  # all | --vim-only | --neovim-only
+
+NVIM_CONFIG_DIR="$HOME/.config/nvim"
+KICKSTART_REPO="https://github.com/nvim-lua/kickstart.nvim.git"
 
 echo "=== Vim/Neovim Setup ==="
 
-# --- 1. Install Neovim ---
+# --- Install Neovim ---
 install_neovim() {
   if ! command -v nvim &>/dev/null; then
-    echo "Neovim not found. Installing via Homebrew..."
     if ! command -v brew &>/dev/null; then
-      echo "ERROR: Homebrew is required but not installed."
-      echo "Install it from https://brew.sh"
+      echo "ERROR: Homebrew is required. Install from https://brew.sh first."
       exit 1
     fi
+    echo "Installing Neovim via Homebrew..."
     brew install neovim
-    echo "Neovim installed: $(nvim --version | head -1)"
   else
     echo "Neovim already installed: $(nvim --version | head -1)"
   fi
+
+  # Build deps for treesitter parsers
+  for dep in ripgrep fd; do
+    if ! command -v "$dep" &>/dev/null; then
+      echo "  Installing $dep (used by Telescope/treesitter)..."
+      brew install "$dep"
+    fi
+  done
 }
 
-# --- 2. Deploy Neovim config ---
+# --- Deploy kickstart.nvim as the default config ---
 deploy_neovim_config() {
-  local NVIM_CONFIG="$HOME/.config/nvim"
-  local NVIM_SOURCE="$MYCONFIG_DIR/neovim/nvim"
-
-  if [ ! -d "$NVIM_SOURCE" ]; then
-    echo "WARNING: Neovim config source not found at $NVIM_SOURCE"
-    echo "Make sure ~/myconfig repo is cloned with submodules:"
-    echo "  git submodule update --init --recursive"
-    return 1
+  if [ -d "$NVIM_CONFIG_DIR" ] || [ -L "$NVIM_CONFIG_DIR" ]; then
+    BACKUP="$NVIM_CONFIG_DIR.backup.$(date +%Y%m%d_%H%M%S)"
+    mv "$NVIM_CONFIG_DIR" "$BACKUP"
+    echo "  Backed up existing config → $BACKUP"
   fi
 
-  # Backup existing config
-  if [ -d "$NVIM_CONFIG" ] || [ -L "$NVIM_CONFIG" ]; then
-    BACKUP="$NVIM_CONFIG.backup.$(date +%Y%m%d%H%M%S)"
-    mv "$NVIM_CONFIG" "$BACKUP"
-    echo "Existing nvim config backed up to: $BACKUP"
-  fi
-
-  # Create symlink to myconfig neovim
   mkdir -p "$HOME/.config"
-  ln -s "$NVIM_SOURCE" "$NVIM_CONFIG"
-  echo "Neovim config deployed (symlinked to $NVIM_SOURCE)"
+  echo "  Cloning kickstart.nvim..."
+  git clone --depth 1 "$KICKSTART_REPO" "$NVIM_CONFIG_DIR"
 
+  # Detach .git so user's customizations don't conflict with upstream
+  rm -rf "$NVIM_CONFIG_DIR/.git"
+  echo "  Deployed kickstart.nvim → $NVIM_CONFIG_DIR (detached from upstream — yours to edit)"
   echo ""
-  echo "Open nvim to trigger lazy.nvim plugin installation."
+  echo "  Open nvim once to trigger lazy.nvim plugin install (auto-runs on first launch)."
+  echo "  Customize: \$EDITOR $NVIM_CONFIG_DIR/init.lua"
 }
 
-# --- 3. Setup classic Vim ---
+# --- Setup classic Vim (fallback for systems without nvim) ---
 setup_vim() {
   local VIMRC="$HOME/.vimrc"
-
   echo ""
   echo "Setting up classic Vim..."
 
-  # Backup existing vimrc
   if [ -f "$VIMRC" ]; then
-    BACKUP="$VIMRC.backup.$(date +%Y%m%d%H%M%S)"
+    BACKUP="$VIMRC.backup.$(date +%Y%m%d_%H%M%S)"
     cp "$VIMRC" "$BACKUP"
-    echo "Existing .vimrc backed up to: $BACKUP"
+    echo "  Backed up existing .vimrc → $BACKUP"
   fi
 
-  # Install vim-plug
+  # Install vim-plug (official install method per junegunn/vim-plug README)
   PLUG_VIM="$HOME/.vim/autoload/plug.vim"
   if [ ! -f "$PLUG_VIM" ]; then
-    echo "Installing vim-plug..."
+    echo "  Installing vim-plug..."
     curl -fLo "$PLUG_VIM" --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    echo "vim-plug installed."
   else
-    echo "vim-plug already installed."
+    echo "  vim-plug already installed."
   fi
 
-  # Deploy vimrc (merge custom keybindings + plugins)
   cp "$SCRIPT_DIR/vimrc" "$VIMRC"
-  echo "vimrc deployed."
+  echo "  Deployed vimrc."
 
-  # Install plugins
-  echo "Installing Vim plugins..."
+  echo "  Installing Vim plugins (PlugInstall)..."
   vim +PlugInstall +qall 2>/dev/null || true
-  echo "Vim plugins installed."
 }
 
-# --- Main ---
 case "$MODE" in
   --vim-only)
     setup_vim
@@ -99,11 +93,11 @@ case "$MODE" in
   *)
     install_neovim
     deploy_neovim_config
-    setup_vim
     ;;
 esac
 
 echo ""
-echo "=== Setup Complete ==="
-echo "  nvim  → full Lua IDE config"
-echo "  vim   → classic config with molokai + airline"
+echo "=== Vim Setup Complete ==="
+echo "  nvim  → kickstart.nvim (LSP, treesitter, telescope, completion)"
+echo "          Edit: $NVIM_CONFIG_DIR/init.lua"
+echo "          Docs: https://github.com/nvim-lua/kickstart.nvim"

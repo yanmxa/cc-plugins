@@ -1,59 +1,75 @@
 ---
 name: setup-vim
-description: Install and configure Neovim (or Vim) with a full IDE setup including LSP, Telescope, Treesitter, and custom keybindings. Use this skill when the user mentions setting up vim, neovim, nvim, configuring vim, vim setup, editor setup, or wants to deploy their editor config on a new machine.
+description: Install Neovim with kickstart.nvim (the community-maintained starter config) — full IDE setup with LSP, Telescope, Treesitter, autocompletion. Optional classic Vim fallback with vim-plug. Use this skill when the user mentions setting up vim, neovim, nvim, configuring vim, vim setup, editor setup, or wants Neovim on a new machine.
 allowed-tools: [Bash, Read, Write, Edit]
 ---
 
 # Setup Vim / Neovim
 
-Set up a fully configured Neovim environment with a Lua-based config, or a classic Vim setup with vim-plug and molokai theme.
+Install Neovim and deploy **kickstart.nvim** as the default config — the official starting-point recommended by the Neovim community. Single-file `init.lua` you can read, understand, and customize.
 
 ## What gets installed
 
 ### Neovim (default)
-- **Neovim** (via Homebrew if not present)
-- **Full Lua config** from `~/myconfig/neovim/nvim/` deployed to `~/.config/nvim/`
-- Includes: Telescope, Navigator, LSP, Treesitter, catppuccin theme, nvim-tree, barbar tabs, auto-pairs, auto-save, gitsigns, which-key, and more
+- **Neovim** via Homebrew
+- **ripgrep + fd** (used by Telescope and treesitter for fast search)
+- **kickstart.nvim** cloned to `~/.config/nvim/` (`.git` removed so it's yours to edit)
 
-### Vim (fallback)
-- **vim-plug** plugin manager
-- **molokai** theme, vim-polyglot syntax, vim-airline status bar
-- Custom IJKL navigation keybindings (Dvorak-friendly)
+kickstart.nvim ships with:
+- LSP setup (Mason for managing language servers)
+- Treesitter (syntax + indentation)
+- Telescope (fuzzy finder)
+- nvim-cmp (completion)
+- which-key (keybinding hints)
+- gitsigns (git change indicators)
+- A clean colorscheme (tokyonight)
+
+All in **one readable `init.lua` file**.
+
+### Vim (`--vim-only` fallback)
+- **vim-plug** plugin manager (official curl install)
+- Bundled `vimrc` with molokai theme, airline, polyglot
 
 ## Quick setup
-
-Run the bundled script:
 
 ```bash
 bash ${CLAUDE_SKILL_DIR}/scripts/setup-vim.sh
 ```
 
-Options:
-- Default: installs Neovim and deploys full Lua config
-- `--vim-only`: sets up classic Vim with vim-plug and bundled vimrc
-- `--neovim-only`: only installs/updates Neovim config (skip Vim)
+Modes:
+| Flag | Behavior |
+|------|----------|
+| (default) | Install Neovim + kickstart.nvim |
+| `--neovim-only` | Same as default |
+| `--vim-only` | Install classic Vim with vim-plug only |
 
-The script backs up any existing config before overwriting.
+The script backs up any existing `~/.config/nvim/` or `~/.vimrc` before overwriting.
 
-## Custom keybindings (Vim mode)
+## After install
 
-The bundled vimrc uses remapped navigation (Dvorak-style):
+Open `nvim` once — `lazy.nvim` auto-installs all plugins. To customize:
+```bash
+$EDITOR ~/.config/nvim/init.lua
+```
 
-| Action | Binding |
-|--------|---------|
-| Up / 5 up | `i` / `I` |
-| Down / 5 down | `k` / `K` |
-| Left (word back) | `j` / `J` (B) |
-| Right (word end) | `l` / `L` (E) |
-| Insert | `h` / `H` |
-| Top of file | `Space + i` |
-| Bottom of file | `Space + k` |
-| Save | `S` |
-| Quit | `Q` |
-| Split right/left | `sl` / `sj` |
-| Split up/down | `si` / `sk` |
+The kickstart.nvim docs walk you through every section:
+- https://github.com/nvim-lua/kickstart.nvim
 
-## Customization
+## Why kickstart.nvim and not LazyVim/NvChad/...
 
-- **Neovim**: Edit files in `~/.config/nvim/lua/plugins/` to add/remove plugins
-- **Vim**: Edit `~/.vimrc` to customize; run `:PlugInstall` to install new plugins
+- **Single file** — read the whole config in one sitting
+- **No abstractions** — what you see is what runs
+- **Officially blessed** by the neovim core team
+- **Easy to delete** — if you outgrow it, you understand exactly what to keep
+
+LazyVim / NvChad are great but opinionated and harder to debug if something breaks.
+
+## Switching to a different distribution
+
+```bash
+rm -rf ~/.config/nvim
+git clone https://github.com/LazyVim/starter ~/.config/nvim       # LazyVim
+# or:
+git clone https://github.com/NvChad/starter ~/.config/nvim        # NvChad
+nvim   # auto-bootstraps
+```
