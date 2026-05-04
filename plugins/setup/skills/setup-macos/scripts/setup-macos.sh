@@ -3,32 +3,135 @@
 set -euo pipefail
 
 SKILL_BASE="$HOME/.claude/plugins/setup/skills"
+SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
 
 # ── Component registry: id|label|script ──────────────────────────────────────
-# Edit this list to add/remove components
 COMPONENTS=(
   "brew|Homebrew (package manager — required for everything else)|"
   "zsh|Zsh + Oh My Zsh + plugins + powerlevel10k + uv/fnm/Go|$SKILL_BASE/setup-zsh/scripts/setup-zsh.sh"
-  "vim|Neovim with full Lua config|$SKILL_BASE/setup-vim/scripts/setup-vim.sh"
+  "vim|Neovim with kickstart.nvim|$SKILL_BASE/setup-vim/scripts/setup-vim.sh"
   "tmux|tmux + TPM + Dracula theme|$SKILL_BASE/setup-tmux/scripts/setup-tmux.sh"
   "git|Git global config + GitHub CLI (gh) + SSH key|$SKILL_BASE/setup-git/scripts/setup-git.sh"
   "ghostty|Ghostty terminal + Nerd Font|$SKILL_BASE/setup-ghostty/scripts/setup-ghostty.sh"
-  "docker|Docker via OrbStack (fast, free for personal — replaces Docker Desktop)|$SKILL_BASE/setup-docker/scripts/setup-docker.sh"
+  "docker|Docker via OrbStack|$SKILL_BASE/setup-docker/scripts/setup-docker.sh"
   "hysteria2|Hysteria 2 proxy client (hy2start/hy2stop/hy2log)|$SKILL_BASE/setup-hysteria2/scripts/setup-hysteria2.sh"
-  "prefs|macOS system preferences (4 dev-friendly defaults — extensions, screenshots, etc.)|"
+  "prefs|macOS dev-friendly system preferences (4 settings)|"
 )
 
+# ── Component status detection (binary + config applied) ─────────────────────
+# Returns 0 if installed AND configured. 1 otherwise.
+check_installed() {
+  local id="$1"
+  case "$id" in
+    brew)
+      command -v brew &>/dev/null
+      ;;
+    zsh)
+      [ -d "$HOME/.oh-my-zsh" ] \
+        && [ -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ] \
+        && grep -q '^plugins=.*zsh-autosuggestions' "$HOME/.zshrc" 2>/dev/null \
+        && command -v uv &>/dev/null \
+        && command -v fnm &>/dev/null
+      ;;
+    vim)
+      command -v nvim &>/dev/null \
+        && [ -f "$HOME/.config/nvim/init.lua" ]
+      ;;
+    tmux)
+      command -v tmux &>/dev/null \
+        && [ -f "$HOME/.tmux.conf" ] \
+        && [ -d "$HOME/.tmux/plugins/tpm" ]
+      ;;
+    git)
+      command -v git &>/dev/null \
+        && command -v gh &>/dev/null \
+        && [ -n "$(git config --global user.email 2>/dev/null)" ] \
+        && [ -n "$(git config --global user.name 2>/dev/null)" ] \
+        && [ -f "$HOME/.ssh/id_ed25519" ] \
+        && [ -f "$HOME/.gitignore_global" ]
+      ;;
+    ghostty)
+      [ -d "/Applications/Ghostty.app" ] \
+        && [ -f "$HOME/.config/ghostty/config" ]
+      ;;
+    docker)
+      [ -d "/Applications/OrbStack.app" ] \
+        && command -v docker &>/dev/null
+      ;;
+    hysteria2)
+      command -v hysteria &>/dev/null \
+        && [ -f "$HOME/.config/hysteria/config.yaml" ] \
+        && [ -f "$HOME/.config/hysteria/aliases.sh" ] \
+        && [ -f "$HOME/Library/LaunchAgents/com.hysteria.client.plist" ]
+      ;;
+    prefs)
+      [ "$(defaults read com.apple.finder AppleShowAllExtensions 2>/dev/null)" = "1" ] \
+        && [ "$(defaults read com.apple.dock show-recents 2>/dev/null)" = "0" ] \
+        && [ "$(defaults read com.apple.desktopservices DSDontWriteNetworkStores 2>/dev/null)" = "1" ]
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+# Reason if not installed (best-effort hint for the picker)
+status_hint() {
+  local id="$1"
+  case "$id" in
+    brew)      command -v brew &>/dev/null || echo "not installed" ;;
+    zsh)
+      [ ! -d "$HOME/.oh-my-zsh" ] && { echo "no Oh My Zsh"; return; }
+      [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ] && { echo "no powerlevel10k"; return; }
+      grep -q '^plugins=.*zsh-autosuggestions' "$HOME/.zshrc" 2>/dev/null || { echo "plugins not in .zshrc"; return; }
+      command -v uv  &>/dev/null || { echo "uv missing"; return; }
+      command -v fnm &>/dev/null || { echo "fnm missing"; return; }
+      ;;
+    vim)
+      command -v nvim &>/dev/null || { echo "no nvim binary"; return; }
+      [ -f "$HOME/.config/nvim/init.lua" ] || echo "no init.lua"
+      ;;
+    tmux)
+      command -v tmux &>/dev/null || { echo "no tmux binary"; return; }
+      [ -f "$HOME/.tmux.conf" ] || { echo "no .tmux.conf"; return; }
+      [ -d "$HOME/.tmux/plugins/tpm" ] || echo "no TPM"
+      ;;
+    git)
+      command -v git &>/dev/null || { echo "no git binary"; return; }
+      command -v gh  &>/dev/null || { echo "no gh CLI"; return; }
+      [ -z "$(git config --global user.email 2>/dev/null)" ] && { echo "no git user.email"; return; }
+      [ -f "$HOME/.ssh/id_ed25519" ] || { echo "no SSH key"; return; }
+      [ -f "$HOME/.gitignore_global" ] || echo "no global gitignore"
+      ;;
+    ghostty)
+      [ -d "/Applications/Ghostty.app" ] || { echo "Ghostty.app not installed"; return; }
+      [ -f "$HOME/.config/ghostty/config" ] || echo "no config"
+      ;;
+    docker)
+      [ -d "/Applications/OrbStack.app" ] || { echo "OrbStack not installed"; return; }
+      command -v docker &>/dev/null || echo "no docker CLI"
+      ;;
+    hysteria2)
+      command -v hysteria &>/dev/null || { echo "no hysteria binary"; return; }
+      [ -f "$HOME/.config/hysteria/config.yaml" ] || { echo "no config.yaml"; return; }
+      [ -f "$HOME/Library/LaunchAgents/com.hysteria.client.plist" ] || echo "no launchd plist"
+      ;;
+    prefs)
+      [ "$(defaults read com.apple.finder AppleShowAllExtensions 2>/dev/null)" = "1" ] || { echo "extensions hidden"; return; }
+      [ "$(defaults read com.apple.dock show-recents 2>/dev/null)" = "0" ] || echo "dock recents enabled"
+      ;;
+  esac
+}
+
 # ── Argument parsing ─────────────────────────────────────────────────────────
-SELECTED=""        # comma-separated component ids; empty = interactive
+SELECTED=""
 
 usage() {
   cat <<EOF
-Usage: setup-macos.sh [--components <list>] [--all] [--interactive]
+Usage: setup-macos.sh [--components <list>] [--all] [--list]
 
-  --components <list>   Comma-separated component IDs to run, e.g. zsh,git,hysteria2
+  --components <list>   Comma-separated component IDs (e.g. zsh,git,hysteria2)
   --all                 Run every component
-  --interactive         Interactive picker (default if no flags given)
-  --list                Show available components
+  --list                Show all components with current install status
+  -h, --help            Show this help
 
 Components:
 EOF
@@ -38,54 +141,122 @@ EOF
   done
 }
 
+# Comma-list of all component ids
+all_ids() {
+  local ids=()
+  for c in "${COMPONENTS[@]}"; do
+    IFS='|' read -r id _ _ <<< "$c"
+    ids+=("$id")
+  done
+  (IFS=,; echo "${ids[*]}")
+}
+
+show_list() {
+  echo "Components (status checked against current system):"
+  echo ""
+  printf "  %-12s %-10s %s\n" "ID" "STATUS" "DESCRIPTION"
+  printf "  %-12s %-10s %s\n" "----" "------" "-----------"
+  for c in "${COMPONENTS[@]}"; do
+    IFS='|' read -r id label _ <<< "$c"
+    if check_installed "$id"; then
+      printf "  %-12s %-10s %s\n" "$id" "[ OK ]" "$label"
+    else
+      hint="$(status_hint "$id")"
+      printf "  %-12s %-10s %s%s\n" "$id" "[MISS]" "$label" "${hint:+  ($hint)}"
+    fi
+  done
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --components)  SELECTED="$2"; shift 2 ;;
-    --all)         SELECTED="$(printf '%s,' "${COMPONENTS[@]}" | sed 's/|[^,]*//g; s/,$//')"; shift ;;
-    --interactive) SELECTED=""; shift ;;
-    --list)        usage; exit 0 ;;
+    --all)         SELECTED="$(all_ids)"; shift ;;
+    --list)        show_list; exit 0 ;;
     -h|--help)     usage; exit 0 ;;
     *) echo "Unknown argument: $1"; usage; exit 1 ;;
   esac
 done
 
-# ── Interactive picker (only if no --components given) ───────────────────────
+# ── Interactive multi-select picker ──────────────────────────────────────────
 if [ -z "$SELECTED" ]; then
-  echo "╔══════════════════════════════════════════╗"
-  echo "║   macOS Dev Environment — Select Setup   ║"
-  echo "╚══════════════════════════════════════════╝"
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║          macOS Dev Environment — Component Picker            ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
   echo ""
-  echo "Pick components to install (one per line, Y=yes, n=skip):"
+  echo "Current status:"
   echo ""
+  printf "  %-3s  %-10s %-12s %s\n" "#" "STATUS" "ID" "DESCRIPTION"
+  printf "  %-3s  %-10s %-12s %s\n" "-" "------" "----" "-----------"
 
-  PICKED=()
+  IDS=()
+  i=1
   for c in "${COMPONENTS[@]}"; do
     IFS='|' read -r id label _ <<< "$c"
-    # Sensible defaults: Y for core, n for proxy / GUI tools
-    case "$id" in
-      brew|zsh|git)  default="Y" ;;
-      *)             default="n" ;;
-    esac
-    prompt="  $id ($label) [${default}/$( [[ $default == Y ]] && echo n || echo y)] "
-    read -r -p "$prompt" reply
-    reply="${reply:-$default}"
-    case "$reply" in
-      y|Y) PICKED+=("$id") ;;
-    esac
+    IDS+=("$id")
+    if check_installed "$id"; then
+      printf "  %-3s  %-10s %-12s %s\n" "$i" "[ OK ]" "$id" "$label"
+    else
+      hint="$(status_hint "$id")"
+      printf "  %-3s  %-10s %-12s %s%s\n" "$i" "[MISS]" "$id" "$label" "${hint:+  ($hint)}"
+    fi
+    i=$((i+1))
   done
 
+  echo ""
+  echo "Pick components to install (space-separated numbers):"
+  echo "  e.g.  '2 5 7'    install zsh, git, hysteria2"
+  echo "        'all'      install everything"
+  echo "        'missing'  install everything not currently ready"
+  echo "        Enter      cancel"
+  echo ""
+  read -r -p "> " input
+
+  PICKED=()
+  case "$input" in
+    "")
+      echo "Cancelled."
+      exit 0
+      ;;
+    all)
+      PICKED=("${IDS[@]}")
+      ;;
+    missing)
+      for id in "${IDS[@]}"; do
+        check_installed "$id" || PICKED+=("$id")
+      done
+      ;;
+    *)
+      for n in $input; do
+        if [[ "$n" =~ ^[0-9]+$ ]] && [ "$n" -ge 1 ] && [ "$n" -le "${#IDS[@]}" ]; then
+          PICKED+=("${IDS[$((n-1))]}")
+        else
+          echo "Invalid number: '$n' — skipping"
+        fi
+      done
+      ;;
+  esac
+
   if [ ${#PICKED[@]} -eq 0 ]; then
-    echo ""
     echo "Nothing selected. Exiting."
     exit 0
   fi
 
   SELECTED="$(IFS=,; echo "${PICKED[*]}")"
-fi
 
-echo ""
-echo "Will run: $SELECTED"
-echo ""
+  # Show the equivalent CLI command
+  echo ""
+  echo "─────────────────────────────────────────────────────────"
+  echo "Selected: $SELECTED"
+  echo ""
+  echo "Equivalent command (copy to re-run later):"
+  echo "  bash $SELF --components $SELECTED"
+  echo "─────────────────────────────────────────────────────────"
+  echo ""
+  read -r -p "Proceed? [Y/n] " confirm
+  case "${confirm:-Y}" in
+    n|N) echo "Cancelled."; exit 0 ;;
+  esac
+fi
 
 # ── Helper: run a single component ───────────────────────────────────────────
 should_run() {
@@ -104,7 +275,7 @@ run_step() {
   fi
 }
 
-# ── Step: Homebrew ───────────────────────────────────────────────────────────
+# ── Step: Homebrew (no script — inline) ──────────────────────────────────────
 if should_run "brew"; then
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -131,24 +302,17 @@ for c in "${COMPONENTS[@]}"; do
   fi
 done
 
-# ── Step: macOS system preferences (minimal — only universally useful) ──────
+# ── Step: macOS system preferences (no script — inline) ─────────────────────
 if should_run "prefs"; then
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "  [prefs] macOS system preferences"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  # Finder: show all file extensions (avoid ambiguous filenames)
   defaults write com.apple.finder AppleShowAllExtensions -bool true
-
-  # Dock: hide the "recent apps" section (rarely useful, just clutter)
   defaults write com.apple.dock show-recents -bool false
-
-  # Screenshots: save to ~/Desktop/screenshots/ instead of cluttering Desktop
   mkdir -p "$HOME/Desktop/screenshots"
   defaults write com.apple.screencapture location "$HOME/Desktop/screenshots"
-
-  # Don't write .DS_Store on network drives (avoid polluting shared SMB shares)
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
   killall Dock    2>/dev/null || true
@@ -157,17 +321,31 @@ if should_run "prefs"; then
   echo "  macOS preferences applied (4 settings)."
 fi
 
+# ── Final summary with status verification ──────────────────────────────────
 echo ""
-echo "╔══════════════════════════════════════╗"
-echo "║         Setup Complete!              ║"
-echo "╚══════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║                       Setup Complete                         ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+echo "Verification (each component checked for binary AND applied config):"
+echo ""
+IFS=',' read -r -a RAN_IDS <<< "$SELECTED"
+for id in "${RAN_IDS[@]}"; do
+  if check_installed "$id"; then
+    printf "  %-12s [ OK ]\n" "$id"
+  else
+    hint="$(status_hint "$id")"
+    printf "  %-12s [MISS] %s\n" "$id" "${hint:-incomplete}"
+  fi
+done
+
 echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal (or: source ~/.zshrc)"
 echo "  2. Run 'p10k configure' to set up the prompt"
 echo "  3. In tmux: prefix + I  to install plugins"
-echo "  4. Add your SSH public key / gh authenticate"
+should_run "git"       && echo "  4. Verify GitHub auth: gh auth status"
 should_run "hysteria2" && echo "  5. Edit ~/.config/hysteria/config.yaml + run 'hy2start'"
+should_run "docker"    && echo "  6. Verify Docker: docker run hello-world"
 echo ""
-echo "Re-run any single component:"
-echo "  bash setup-macos.sh --components <id>"
+echo "Re-check status anytime:  bash $SELF --list"

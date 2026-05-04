@@ -3,7 +3,7 @@
   "name": "cc-plugins",
   "description": "Claude Code Plugins for workflow automation with Git, Jira, Dev, and environment setup skills",
   "metadata": {
-    "version": "2.5.0"
+    "version": "2.6.0"
   },
   "owner": {
     "name": "Meng Yan",
