@@ -1,7 +1,7 @@
 {
   "name": "setup",
   "description": "macOS development environment bootstrap — Homebrew, Zsh (uv/fnm/Go), Neovim, tmux, Git+gh, Ghostty, Docker (OrbStack), Hysteria2 proxy, and system preferences. Modular skills, multi-select picker.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "author": {
     "name": "Meng Yan",
     "email": "myan@redhat.com"

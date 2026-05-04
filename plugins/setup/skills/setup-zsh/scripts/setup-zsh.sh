@@ -119,133 +119,65 @@ write_zshrc() {
   fi
 
   cat > "$ZSHRC" << 'ZSHRC_EOF'
-# ════════════════════════════════════════════════════════════════════════════
-# ~/.zshrc — main shell config (tracked in dotfiles)
-#
-# Three-tier config layout:
-#   ~/.zshrc        — generic/portable config (this file, tracked)
-#   ~/.env          — environment variables / secrets    (gitignored)
-#   ~/.zshrc.local  — machine-specific aliases/functions (gitignored)
-# ════════════════════════════════════════════════════════════════════════════
+# ~/.zshrc — generic shell config. Secrets → ~/.env. Machine extras → ~/.zshrc.local.
 
-# Oh My Zsh
+# ── Oh My Zsh ──
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf-tab z)
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 
-# Locale & editor
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export EDITOR='nvim'
-export VISUAL='nvim'
-export PAGER='less'
+# ── Locale & editor ──
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+export EDITOR=nvim VISUAL=nvim PAGER=less
 
-# History (override OMZ defaults — keep more, dedupe, share across sessions)
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=50000
-SAVEHIST=50000
-setopt HIST_IGNORE_DUPS HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE \
-       HIST_REDUCE_BLANKS SHARE_HISTORY HIST_VERIFY EXTENDED_HISTORY
+# ── History (50k, dedupe, shared) ──
+HISTFILE="$HOME/.zsh_history"; HISTSIZE=50000; SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS \
+       SHARE_HISTORY HIST_VERIFY EXTENDED_HISTORY
 
-# PATH: common local bins (uv, cargo tools, etc. install here)
-[ -d "$HOME/.local/bin" ]      && export PATH="$HOME/.local/bin:$PATH"
+# ── PATH ──
+[ -d "$HOME/.local/bin" ] && export PATH="$HOME/.local/bin:$PATH"
 
-# ── Python ──────────────────────────────────────────────────────────────────
-# uv manages Python versions + venvs + packages — never install globally
-# Install Python:  uv python install 3.12
-# New project:     uv init myproject  (creates pyproject.toml + .venv)
-# Existing dir:    uv venv && source .venv/bin/activate
-# Run script:      uv run script.py
-# Global CLI tool: uv tool install ruff   (isolated, not global)
-export UV_PYTHON_PREFERENCE=only-managed   # always use uv-managed Python, not system Python
+# ── Python (uv) ── force venv use; bare `pip install` is blocked
+export UV_PYTHON_PREFERENCE=only-managed
 command -v uv &>/dev/null && eval "$(uv generate-shell-completion zsh)"
-
-# Intercept bare 'pip install' to prevent accidental global installs
 pip() {
-  if [[ "${1:-}" == "install" ]]; then
-    echo "ERROR: Do not install into the global Python environment."
-    echo "  In a project:  uv venv && source .venv/bin/activate && uv pip install ..."
-    echo "  CLI tool:      uv tool install <package>"
-    return 1
-  fi
+  [[ "${1:-}" == install ]] && { echo "Use: uv venv && uv pip install ...   |   uv tool install <pkg>"; return 1; }
   command pip "$@"
 }
 
-# conda / miniforge (optional — data science or complex binary deps)
-for _conda in "$HOME/miniforge3" "$HOME/miniconda3" "$HOME/opt/miniforge3" "$HOME/opt/miniconda3"; do
-  if [ -f "$_conda/etc/profile.d/conda.sh" ]; then
-    source "$_conda/etc/profile.d/conda.sh"
-    break
-  fi
-done
-unset _conda
+# ── Node (fnm) ── auto-switches on .nvmrc / .node-version
+command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
 
-# ── Node.js ─────────────────────────────────────────────────────────────────
-# fnm: fast Node version manager — reads .node-version / .nvmrc automatically
-# Install Node:  fnm install 20
-# Default:       fnm default 20
-# Per-project:   echo "20" > .node-version  (fnm switches on cd)
-if command -v fnm &>/dev/null; then
-  eval "$(fnm env --use-on-cd --shell zsh)"
-fi
+# ── Go ──
+command -v go &>/dev/null && { export GOPATH="$HOME/go"; export PATH="$PATH:$GOPATH/bin"; }
 
-# ── Go ──────────────────────────────────────────────────────────────────────
-# Go modules handle per-project isolation natively (go.mod)
-# Installed binaries go to GOPATH/bin
-if command -v go &>/dev/null; then
-  export GOPATH="$HOME/go"
-  export PATH="$PATH:$GOPATH/bin"
-fi
-
-# ── bun ─────────────────────────────────────────────────────────────────────
-if [ -d "$HOME/.bun" ]; then
-  export BUN_INSTALL="$HOME/.bun"
-  export PATH="$BUN_INSTALL/bin:$PATH"
-  [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-fi
-
-# ── Cargo (Rust) ─────────────────────────────────────────────────────────────
-[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
-
-# ── Google Cloud SDK ─────────────────────────────────────────────────────────
-_gcloud="$HOME/google-cloud-sdk"
-[ -f "$_gcloud/path.zsh.inc" ]       && source "$_gcloud/path.zsh.inc"
-[ -f "$_gcloud/completion.zsh.inc" ] && source "$_gcloud/completion.zsh.inc"
-unset _gcloud
-
-# ── Shell tools ──────────────────────────────────────────────────────────────
+# ── Smart cd (zoxide) ──
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
 
-[ -f "$HOME/.claude/scripts/ssh-fzf.sh" ]    && source "$HOME/.claude/scripts/ssh-fzf.sh"
-[ -f "$HOME/.claude/scripts/kube-magic.sh" ] && source "$HOME/.claude/scripts/kube-magic.sh"
+# ── Optional toolchains (loaded only if installed) ──
+[ -f "$HOME/.cargo/env" ]                          && source "$HOME/.cargo/env"
+[ -d "$HOME/.bun" ]                                && { export BUN_INSTALL="$HOME/.bun"; export PATH="$BUN_INSTALL/bin:$PATH"; [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"; }
+[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]       && source "$HOME/google-cloud-sdk/path.zsh.inc"
+[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
+for _c in "$HOME/miniforge3" "$HOME/miniconda3"; do
+  [ -f "$_c/etc/profile.d/conda.sh" ] && { source "$_c/etc/profile.d/conda.sh"; break; }
+done; unset _c
 
-# zsh-syntax-highlighting (must be sourced last)
-_zsh_hl="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-[ -f "$_zsh_hl" ] && source "$_zsh_hl"
-unset _zsh_hl
+# ── zsh-syntax-highlighting (MUST be last among plugins) ──
+_h="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[ -f "$_h" ] && source "$_h"; unset _h
 
-# ── Aliases ───────────────────────────────────────────────────────────────────
-alias vim='nvim'
-alias vi='vi'
-alias ll='ls -lAh'
-alias la='ls -la'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias grep='grep --color=auto'
-alias mkdir='mkdir -p'
-alias g='git'
-alias k='kubectl'
-alias d='docker'
-alias dc='docker compose'
+# ── Aliases ──
+alias vim=nvim vi=vi
+alias ll='ls -lAh' la='ls -la' l='ls -CF'
+alias ..='cd ..' ...='cd ../..' ....='cd ../../..'
+alias grep='grep --color=auto' mkdir='mkdir -p'
+alias g=git k=kubectl d=docker dc='docker compose'
 
-# ── Functions ────────────────────────────────────────────────────────────────
-# mkcd — create dir and cd into it
+# ── Functions ──
 mkcd() { mkdir -p "$1" && cd "$1"; }
-
-# extract — uniform archive extractor
 extract() {
   [ -f "$1" ] || { echo "extract: '$1' is not a file"; return 1; }
   case "$1" in
@@ -262,14 +194,8 @@ extract() {
   esac
 }
 
-# ════════════════════════════════════════════════════════════════════════════
-# Per-machine configuration (sourced last — overrides everything above)
-# ════════════════════════════════════════════════════════════════════════════
-
-# ~/.env — environment variables, secrets, API keys (gitignored)
-[ -f "$HOME/.env" ] && set -a && source "$HOME/.env" && set +a
-
-# ~/.zshrc.local — machine-specific aliases, functions, work-only config (gitignored)
+# ── Local overrides (last — wins over everything above) ──
+[ -f "$HOME/.env" ]         && { set -a; source "$HOME/.env"; set +a; }
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 ZSHRC_EOF
 
