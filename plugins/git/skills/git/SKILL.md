@@ -20,8 +20,6 @@ Commit changes with DCO sign-off and push to origin.
    type: descriptive title
 
    Detailed description of changes.
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
    EOF
    )"
    ```
