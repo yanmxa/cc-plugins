@@ -97,6 +97,17 @@ install_tools() {
     echo "  fnm already installed: $(fnm --version)"
   fi
 
+  # Node.js (latest LTS via fnm)
+  eval "$(fnm env --shell bash)" 2>/dev/null || true
+  if ! fnm ls 2>/dev/null | grep -q 'v[0-9]'; then
+    echo "  Installing Node.js (latest LTS)..."
+    fnm install --lts
+    fnm default lts-latest
+    echo "  ✓ Node.js installed: $(fnm exec --using=lts-latest node --version) — open a new shell to use it"
+  else
+    echo "  Node.js already installed: $(fnm current 2>/dev/null || echo 'see fnm ls')"
+  fi
+
   # Go
   if ! command -v go &>/dev/null; then
     echo "  Installing Go..."
