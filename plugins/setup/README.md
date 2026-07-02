@@ -15,7 +15,7 @@ A modular set of skills for bootstrapping a fresh macOS development environment.
 | `git` | git + gh + global config + SSH key | `~/.gitconfig`, `~/.gitignore_global`, `~/.ssh/id_ed25519` | needs `brew` |
 | `ghostty` | Ghostty terminal + Nerd Font | `~/.config/ghostty/config` | needs `brew` |
 | `docker` | OrbStack (replaces Docker Desktop) | `/Applications/OrbStack.app` | needs `brew` |
-| `hysteria2` | Hy2 proxy client + launchd service | `~/.config/hysteria/`, plist, sources own aliases | needs `brew`, **self-wires into `~/.zshrc`** |
+| `hysteria2` | Hy2 proxy client + optional launchd service | `~/.config/hysteria/`, plist (service mode), sources own aliases | needs `brew`, **self-wires into `~/.zshrc`** |
 | `prefs` | 4 dev-friendly macOS defaults | `~/Library/Preferences/...` | ✅ standalone |
 
 **The only hard dependency is `brew`** — every install component needs it. Beyond that, components are independent: install in any order, skip any you don't want.
@@ -94,6 +94,8 @@ Otherwise the script prompts. During install, `gh auth login` opens a browser fo
 
 These are NOT prompted by the script — instead the template gets deployed and you edit `~/.config/hysteria/config.yaml` after install (`hy2edit`).
 
+It also asks **how it should run**: `--service` (default — launchd auto-start on login + auto-restart on crash) or `--no-service` (manual — start/stop yourself with `hy2start`/`hy2stop`). Through Claude this is an `AskUserQuestion`; on the CLI pass the flag directly.
+
 **All other components run without questions.**
 
 ---
@@ -136,7 +138,7 @@ Plus language runtimes: `uv` (Python), `fnm` (Node.js), `go` (Go), all installed
 ### `hysteria2`
 - `~/.config/hysteria/config.yaml` (chmod 600 — your server / auth)
 - `~/.config/hysteria/aliases.sh` — `hy2start`/`hy2stop`/`hy2log`/`hy2edit`/`proxyon`/`proxyoff`/...
-- `~/Library/LaunchAgents/com.hysteria.client.plist` (launchd service, auto-start on login)
+- `~/Library/LaunchAgents/com.hysteria.client.plist` (launchd service, auto-start on login) — **only in `--service` mode; skipped in `--no-service` mode**
 - Auto-wires into `~/.zshrc` so aliases load (independent of `zsh` component)
 
 ### `prefs` (4 settings only)

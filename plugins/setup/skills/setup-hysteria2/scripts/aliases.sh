@@ -11,14 +11,29 @@ export HY2_LOG="$HY2_DIR/hysteria.log"
 export HY2_ERR_LOG="$HY2_DIR/hysteria.err.log"
 export HY2_SOCKS_PORT="${HY2_SOCKS_PORT:-1080}"
 export HY2_HTTP_PORT="${HY2_HTTP_PORT:-1081}"
+# hysteria 可执行文件（手动模式后台直跑时用）
+export HY2_BIN="${HY2_BIN:-$(command -v hysteria 2>/dev/null)}"
+
+# 是否为 launchd 服务模式（存在 plist 即是；否则为手动模式）
+hy2_is_service() { [ -f "$HY2_PLIST" ]; }
 
 # ── 服务控制 ───────────────────────────────────────────────────────
 hy2start() {
-  if launchctl list | grep -q "$HY2_LABEL"; then
+  if pgrep -f "hysteria client" > /dev/null; then
     echo "Hy2 已在运行"; hy2status; return
   fi
-  launchctl load "$HY2_PLIST" 2>/dev/null
-  launchctl start "$HY2_LABEL"
+  if hy2_is_service; then
+    # launchd 服务模式
+    launchctl load "$HY2_PLIST" 2>/dev/null
+    launchctl start "$HY2_LABEL"
+  else
+    # 手动模式（无 launchd）：后台直跑，日志写入同一位置
+    if [ -z "$HY2_BIN" ]; then
+      echo "找不到 hysteria 可执行文件（设置 HY2_BIN 或用 brew 安装）"; return 1
+    fi
+    nohup "$HY2_BIN" client -c "$HY2_CONFIG" >>"$HY2_LOG" 2>>"$HY2_ERR_LOG" &
+    disown 2>/dev/null
+  fi
   sleep 1
   if pgrep -f "hysteria client" > /dev/null; then
     echo "Hy2 已启动 (PID: $(pgrep -f 'hysteria client'))"
@@ -28,14 +43,21 @@ hy2start() {
 }
 
 hy2stop() {
-  launchctl stop "$HY2_LABEL" 2>/dev/null
-  launchctl unload "$HY2_PLIST" 2>/dev/null
+  if hy2_is_service; then
+    launchctl stop "$HY2_LABEL" 2>/dev/null
+    launchctl unload "$HY2_PLIST" 2>/dev/null
+  fi
   pkill -f "hysteria client" 2>/dev/null
   echo "Hy2 已停止"
 }
 
 hy2restart() {
-  launchctl kickstart -k "gui/$(id -u)/$HY2_LABEL" 2>/dev/null
+  if hy2_is_service; then
+    launchctl kickstart -k "gui/$(id -u)/$HY2_LABEL" 2>/dev/null
+  else
+    # 手动模式：停后再起
+    hy2stop >/dev/null; sleep 1; hy2start; return
+  fi
   sleep 1
   if pgrep -f "hysteria client" > /dev/null; then
     echo "Hy2 已重启 (PID: $(pgrep -f 'hysteria client'))"
@@ -47,6 +69,11 @@ hy2restart() {
 hy2status() {
   if pgrep -f "hysteria client" > /dev/null; then
     echo "Hy2 运行中 (PID: $(pgrep -f 'hysteria client'))"
+    if hy2_is_service; then
+      echo "模式:   launchd 服务（开机自启 + 崩溃自动拉起）"
+    else
+      echo "模式:   手动（无开机自启）"
+    fi
     echo "SOCKS5: 127.0.0.1:$HY2_SOCKS_PORT"
     echo "HTTP:   127.0.0.1:$HY2_HTTP_PORT"
     lsof -i ":$HY2_SOCKS_PORT" -i ":$HY2_HTTP_PORT" 2>/dev/null | grep LISTEN
@@ -142,11 +169,11 @@ hy2help() {
   cat <<'EOF'
 Hysteria 2 客户端命令：
 
-服务管理：
-  hy2start     启动 launchd 服务
+服务管理（自动适配 launchd 服务 / 手动模式）：
+  hy2start     启动（有 plist 走 launchd 服务，否则后台直跑）
   hy2stop      停止
   hy2restart   重启
-  hy2status    查看 PID + 监听端口
+  hy2status    查看 PID + 模式 + 监听端口
   hy2log       实时日志（Ctrl+C 退出）
   hy2logs      最近 50 行日志
   hy2edit      编辑 ~/.config/hysteria/config.yaml + 自动重启
@@ -162,7 +189,7 @@ Hysteria 2 客户端命令：
 
 文件位置：
   ~/.config/hysteria/config.yaml                       配置（chmod 600）
-  ~/Library/LaunchAgents/com.hysteria.client.plist     launchd 服务
+  ~/Library/LaunchAgents/com.hysteria.client.plist     launchd 服务（仅自启模式）
   ~/.config/hysteria/hysteria.log / hysteria.err.log   日志
 EOF
 }

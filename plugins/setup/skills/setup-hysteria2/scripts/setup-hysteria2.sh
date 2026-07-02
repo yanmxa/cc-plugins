@@ -1,5 +1,6 @@
 #!/bin/bash
-# Setup Hysteria2 client on macOS — install binary, deploy config + plist + aliases
+# Setup Hysteria2 client on macOS — install binary, deploy config + aliases,
+# and (optionally) a launchd auto-start service.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +9,34 @@ HY2_CONFIG="$HY2_DIR/config.yaml"
 HY2_ALIASES="$HY2_DIR/aliases.sh"
 HY2_PLIST="$HOME/Library/LaunchAgents/com.hysteria.client.plist"
 
+# --- Parse args: choose whether to install the launchd auto-start service ---
+# --service     (default) install launchd plist → auto-start on login + KeepAlive
+# --no-service  skip launchd → start/stop manually via hy2start / hy2stop
+INSTALL_SERVICE=1
+for arg in "$@"; do
+  case "$arg" in
+    --service)             INSTALL_SERVICE=1 ;;
+    --no-service|--manual) INSTALL_SERVICE=0 ;;
+    -h|--help)
+      cat <<'USAGE'
+Usage: setup-hysteria2.sh [--service | --no-service]
+
+  --service     (default) install a launchd service so hysteria auto-starts on
+                login and is kept alive if it crashes.
+  --no-service  do NOT install launchd. You start/stop it yourself with
+                hy2start / hy2stop (runs in the background for the login session).
+USAGE
+      exit 0 ;;
+    *) echo "Unknown option: $arg (use --service or --no-service)" >&2; exit 1 ;;
+  esac
+done
+
 echo "=== Hysteria2 Setup ==="
+if [ "$INSTALL_SERVICE" -eq 1 ]; then
+  echo "  Mode: launchd service (auto-start on login)"
+else
+  echo "  Mode: manual (no launchd auto-start)"
+fi
 
 # --- 1. Install hysteria binary ---
 if ! command -v hysteria &>/dev/null; then
@@ -42,12 +70,23 @@ cp "$SCRIPT_DIR/aliases.sh" "$HY2_ALIASES"
 chmod 755 "$HY2_ALIASES"
 echo "  Deployed aliases → $HY2_ALIASES"
 
-# --- 5. Generate launchd plist ---
-mkdir -p "$HOME/Library/LaunchAgents"
-sed -e "s|__HOME__|$HOME|g" \
-    -e "s|__HYSTERIA_BIN__|$HYSTERIA_BIN|g" \
-    "$SCRIPT_DIR/com.hysteria.client.plist.template" > "$HY2_PLIST"
-echo "  Generated plist → $HY2_PLIST"
+# --- 5. Generate launchd plist (service mode only) ---
+if [ "$INSTALL_SERVICE" -eq 1 ]; then
+  mkdir -p "$HOME/Library/LaunchAgents"
+  sed -e "s|__HOME__|$HOME|g" \
+      -e "s|__HYSTERIA_BIN__|$HYSTERIA_BIN|g" \
+      "$SCRIPT_DIR/com.hysteria.client.plist.template" > "$HY2_PLIST"
+  echo "  Generated launchd plist → $HY2_PLIST (auto-start on login)"
+else
+  # Manual mode: remove any pre-existing plist so the old service stops auto-starting.
+  if [ -f "$HY2_PLIST" ]; then
+    launchctl unload "$HY2_PLIST" 2>/dev/null || true
+    rm -f "$HY2_PLIST"
+    echo "  Removed existing launchd plist (manual mode) → $HY2_PLIST"
+  else
+    echo "  Skipped launchd plist (manual mode)"
+  fi
+fi
 
 # --- 6. Wire aliases into shell (self-sufficient: works without setup-zsh) ---
 ZSHRC="$HOME/.zshrc"
@@ -82,13 +121,21 @@ fi
 echo ""
 echo "=== Hysteria2 Setup Complete ==="
 echo ""
+if [ "$INSTALL_SERVICE" -eq 1 ]; then
+  echo "Mode: launchd service — auto-starts on login, auto-restarts on crash."
+  START_NOTE="launchd background service"
+else
+  echo "Mode: manual — no auto-start. Runs in the background only while you keep it started."
+  START_NOTE="background process (this login session)"
+fi
+echo ""
 echo "Next steps:"
 echo "  1. Edit config (set server / auth / pinSHA256):"
 echo "       hy2edit         # opens \$EDITOR + auto-restarts on save"
 echo ""
 echo "  2. Reload shell + start:"
 echo "       source ~/.zshrc"
-echo "       hy2start        # launchd background service"
+echo "       hy2start        # $START_NOTE"
 echo "       hy2status       # verify"
 echo "       proxyon         # set http/https/all_proxy in this shell"
 echo ""
