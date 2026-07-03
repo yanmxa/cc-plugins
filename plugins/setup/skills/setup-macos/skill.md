@@ -19,6 +19,8 @@ Bootstrap a macOS development environment with a multi-select component picker. 
 | `git` | Git global config + GitHub CLI (`gh` auth) + SSH key + global gitignore |
 | `ghostty` | Ghostty terminal + MesloLGL Nerd Font + optimized config |
 | `hysteria2` | Hysteria 2 proxy client + launchd service + `hy2start`/`hy2stop`/`hy2log` shortcuts |
+| `shadowsocks` | Shadowsocks client (shadowsocks-rust `sslocal`) + `ssstart`/`ssstop`/`sslog` |
+| `sing-box` | sing-box client — one client for **both** Hysteria2 + Shadowsocks + `sbstart`/`sbnode` |
 | `prefs` | macOS system preferences (4 dev-friendly defaults — see below) |
 
 ## How to invoke this skill
@@ -95,7 +97,13 @@ bash ~/.claude/plugins/setup/skills/setup-tmux/scripts/setup-tmux.sh
 bash ~/.claude/plugins/setup/skills/setup-git/scripts/setup-git.sh
 bash ~/.claude/plugins/setup/skills/setup-ghostty/scripts/setup-ghostty.sh
 bash ~/.claude/plugins/setup/skills/setup-hysteria2/scripts/setup-hysteria2.sh
+bash ~/.claude/plugins/setup/skills/setup-shadowsocks/scripts/setup-shadowsocks.sh
+bash ~/.claude/plugins/setup/skills/setup-sing-box/scripts/setup-sing-box.sh
 ```
+
+> The proxy skills (`hysteria2`, `shadowsocks`) also have a **`--server`** mode that
+> SSH-deploys the server side to a Linux VPS — not part of this macOS picker.
+> See each skill's `skill.md`.
 
 ## After setup
 

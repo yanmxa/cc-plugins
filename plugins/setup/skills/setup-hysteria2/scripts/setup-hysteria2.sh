@@ -9,6 +9,24 @@ HY2_CONFIG="$HY2_DIR/config.yaml"
 HY2_ALIASES="$HY2_DIR/aliases.sh"
 HY2_PLIST="$HOME/Library/LaunchAgents/com.hysteria.client.plist"
 
+# --- Mode: server vs client (default: client) ---
+# --server  → SSH-deploy a Hysteria2 SERVER to a Linux VPS, then exit
+#             (delegates to deploy-hysteria2-server.sh; takes --host/--ssh-user/...).
+# --client  → (default) configure THIS Mac as a Hysteria2 client (rest of this file).
+for arg in "$@"; do
+  if [ "$arg" = "--server" ]; then
+    filtered=()
+    for a in "$@"; do
+      case "$a" in --server|--client) ;; *) filtered+=("$a") ;; esac
+    done
+    exec bash "$SCRIPT_DIR/deploy-hysteria2-server.sh" ${filtered[@]+"${filtered[@]}"}
+  fi
+done
+# strip a lone --client so the client arg loop below doesn't reject it
+filtered=()
+for a in "$@"; do case "$a" in --client) ;; *) filtered+=("$a") ;; esac; done
+set -- ${filtered[@]+"${filtered[@]}"}
+
 # --- Parse args: choose whether to install the launchd auto-start service ---
 # --service     (default) install launchd plist → auto-start on login + KeepAlive
 # --no-service  skip launchd → start/stop manually via hy2start / hy2stop
