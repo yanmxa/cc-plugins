@@ -1,0 +1,12 @@
+{
+    "_note": "shadowsocks-rust 客户端(sslocal)配置。chmod 600，不被 git 追踪。填 SERVER_HOST 与 SS_PASSWORD，改完用 ssedit 自动重启。本地 SOCKS5 口默认 1084，避开 hy2(1080/1081) 与 sing-box(1082)。",
+
+    "server": "SERVER_HOST",
+    "server_port": 8388,
+    "password": "SS_PASSWORD",
+    "method": "aes-256-gcm",
+    "local_address": "127.0.0.1",
+    "local_port": 1084,
+    "mode": "tcp_and_udp",
+    "timeout": 300
+}

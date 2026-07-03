@@ -1,0 +1,83 @@
+{
+  // sing-box 客户端配置（合并 Hysteria2 + Shadowsocks 两条出站，可切换）
+  // 文档: https://sing-box.sagernet.org/configuration/
+  //
+  // 此文件 chmod 600，不会被 git 追踪。填好下面的占位符即可：
+  //   SERVER_HOST       你的服务器地址（Hy2 和 SS 若不同机可分别改各自的 server）
+  //   HY2_AUTH_TOKEN    Hysteria2 认证密码 / token
+  //   SS_PASSWORD       Shadowsocks 密码
+  //
+  // 改完用 `sbedit` 会自动 `sing-box check` + 重启。
+
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+
+  "inbounds": [
+    {
+      // 本地混合入口：同一端口同时支持 SOCKS5 + HTTP
+      // 默认 1082，避开 hysteria2 客户端的 1080/1081，两者可共存
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 1082
+    }
+  ],
+
+  "outbounds": [
+    {
+      // 手动选择器：sbnode ss|hy2|auto 切换（改 default 后重启生效）
+      "type": "selector",
+      "tag": "proxy",
+      "outbounds": ["ss", "auto", "hy2"],
+      "default": "ss"
+    },
+    {
+      // 自动测速：在 ss / hy2 之间挑延迟最低的
+      "type": "urltest",
+      "tag": "auto",
+      "outbounds": ["hy2", "ss"],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m",
+      "tolerance": 50
+    },
+    {
+      // Hysteria2 出站（QUIC / UDP，自签证书用 insecure）
+      "type": "hysteria2",
+      "tag": "hy2",
+      "server": "SERVER_HOST",
+      "server_port": 443,
+      "up_mbps": 50,
+      "down_mbps": 200,
+      "password": "HY2_AUTH_TOKEN",
+      "tls": {
+        "enabled": true,
+        "server_name": "bing.com",
+        "insecure": true
+      }
+    },
+    {
+      // Shadowsocks 出站（TCP）
+      "type": "shadowsocks",
+      "tag": "ss",
+      "server": "SERVER_HOST",
+      "server_port": 8388,
+      "method": "aes-256-gcm",
+      "password": "SS_PASSWORD"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+
+  "route": {
+    "rules": [
+      { "action": "sniff" },
+      { "ip_is_private": true, "action": "route", "outbound": "direct" }
+    ],
+    "final": "proxy",
+    "auto_detect_interface": true
+  }
+}

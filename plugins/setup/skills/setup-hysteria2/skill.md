@@ -1,12 +1,39 @@
 ---
 name: setup-hysteria2
-description: Install and configure Hysteria 2 proxy client on macOS. Installs binary via Homebrew, deploys config, adds shortcut commands (hy2start, hy2stop, hy2log, hy2status, hy2restart, hy2edit, proxyon, proxyoff), and OPTIONALLY sets up a launchd auto-start service (asks the user first). Use this skill when the user mentions hysteria2, hy2, proxy client setup, hysteria proxy, or wants to configure a proxy on a new Mac.
+description: Install and configure Hysteria 2 — either a CLIENT on macOS (Homebrew binary, config, shortcut commands like hy2start/hy2stop/hy2log/proxyon, optional launchd service) or a SERVER on a Linux VPS over SSH (official installer, self-signed cert, systemd service, firewall, prints client credentials). Ask the user server-vs-client first. Use this skill when the user mentions hysteria2, hy2, proxy client/server setup, deploying a Hysteria2 server, or connecting to a Hysteria2 proxy on a new Mac.
 allowed-tools: [Bash, Read, Write, Edit, AskUserQuestion]
 ---
 
-# Setup Hysteria2 Client
+# Setup Hysteria2 (server or client)
 
-Install and configure a Hysteria 2 client on macOS. Optionally runs as a launchd background service. Edit one YAML, run one command.
+Two modes:
+- **client** (default) — configure THIS Mac as a Hysteria2 client. Homebrew binary, config, shortcut commands, optional launchd service.
+- **server** — SSH-deploy a Hysteria2 server to a Linux VPS: official installer + self-signed cert + systemd + firewall, then print client credentials to paste back.
+
+## Step 0 — ask which mode
+
+Before anything, use `AskUserQuestion`: **"Set up a Hysteria2 server or client?"**
+- **Client (this Mac)** → the client flow below (`--client`, the default).
+- **Server (a Linux VPS)** → the server flow (`--server`), see [Server mode](#server-mode).
+
+## Server mode
+
+SSH-deploys a Hysteria2 server to a Linux (Debian/Ubuntu) VPS. Needs **key-based SSH** access — run `ssh-copy-id <user>@<host>` once first (the plugin never handles passwords).
+
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/setup-hysteria2.sh --server --host <ip> \
+  [--ssh-user root] [--ssh-port 22] [--ssh-key <path>] [--server-port 443] [--sni bing.com]
+```
+
+It installs hysteria via the official installer, generates a self-signed cert (CN = `--sni`), writes `/etc/hysteria/config.yaml` with a **server-generated** password + `bing.com` masquerade, enables the `hysteria-server` systemd service, opens the port in ufw (UDP+TCP), and prints **server / auth / sni / pinSHA256** plus ready-to-paste snippets for both the standalone client and the sing-box `hy2` outbound. The password is generated on the server — never sent over the wire.
+
+Then set up a client (below, or `setup-sing-box`) and paste the fields.
+
+---
+
+## Client mode
+
+Configure this Mac as a Hysteria 2 client. Optionally runs as a launchd background service. Edit one YAML, run one command.
 
 ## File layout
 

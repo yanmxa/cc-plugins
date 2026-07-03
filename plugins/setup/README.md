@@ -4,7 +4,7 @@ A modular set of skills for bootstrapping a fresh macOS development environment.
 
 ---
 
-## All Components (9 total)
+## All Components (11 total)
 
 | ID | Installs | Files written | Independent? |
 |----|----------|--------------|--------------|
@@ -16,7 +16,13 @@ A modular set of skills for bootstrapping a fresh macOS development environment.
 | `ghostty` | Ghostty terminal + Nerd Font | `~/.config/ghostty/config` | needs `brew` |
 | `docker` | OrbStack (replaces Docker Desktop) | `/Applications/OrbStack.app` | needs `brew` |
 | `hysteria2` | Hy2 proxy client + optional launchd service | `~/.config/hysteria/`, plist (service mode), sources own aliases | needs `brew`, **self-wires into `~/.zshrc`** |
+| `shadowsocks` | Shadowsocks client (`sslocal`) + optional launchd service | `~/.config/shadowsocks/`, plist (service mode), sources own aliases | needs `brew`, **self-wires into `~/.zshrc`** |
+| `sing-box` | sing-box client — one client for Hy2 **and** SS | `~/.config/sing-box/`, plist (service mode), sources own aliases | needs `brew`, **self-wires into `~/.zshrc`** |
 | `prefs` | 4 dev-friendly macOS defaults | `~/Library/Preferences/...` | ✅ standalone |
+
+> **Server side.** The `hysteria2` and `shadowsocks` skills also take `--server`
+> to SSH-deploy the *server* to a Linux VPS (systemd + firewall, prints client
+> creds). That's not part of this macOS picker — see each skill's `skill.md`.
 
 **The only hard dependency is `brew`** — every install component needs it. Beyond that, components are independent: install in any order, skip any you don't want.
 
@@ -140,6 +146,19 @@ Plus language runtimes: `uv` (Python), `fnm` (Node.js), `go` (Go), all installed
 - `~/.config/hysteria/aliases.sh` — `hy2start`/`hy2stop`/`hy2log`/`hy2edit`/`proxyon`/`proxyoff`/...
 - `~/Library/LaunchAgents/com.hysteria.client.plist` (launchd service, auto-start on login) — **only in `--service` mode; skipped in `--no-service` mode**
 - Auto-wires into `~/.zshrc` so aliases load (independent of `zsh` component)
+- `--server` mode: no local files — SSH-deploys the server to a VPS and prints client creds
+
+### `shadowsocks`
+- `~/.config/shadowsocks/config.json` (chmod 600 — server / password), default SOCKS5 `127.0.0.1:1084`
+- `~/.config/shadowsocks/aliases.sh` — `ssstart`/`ssstop`/`sslog`/`ssedit`/`sson`/`ssoff`/...
+- `~/Library/LaunchAgents/com.shadowsocks.client.plist` (launchd, service mode only)
+- `--server` mode: SSH-deploys shadowsocks-rust `ssserver` to a VPS, prints an `ss://` link
+
+### `sing-box`
+- `~/.config/sing-box/config.json` (chmod 600) — merged **Hysteria2 + Shadowsocks** outbounds, switch with `sbnode`
+- `~/.config/sing-box/aliases.sh` — `sbstart`/`sbstop`/`sblog`/`sbedit`/`sbnode`/`sbon`/`sboff`/...
+- `~/Library/LaunchAgents/com.sing-box.client.plist` (launchd, service mode only)
+- Default mixed (SOCKS5 + HTTP) port `127.0.0.1:1082` — coexists with `hysteria2` (1080/1081)
 
 ### `prefs` (4 settings only)
 1. `Finder.AppleShowAllExtensions = true` — see file extensions
@@ -194,7 +213,9 @@ plugins/setup/
 │   ├── setup-git/                             ← git + gh + ssh
 │   ├── setup-ghostty/                         ← terminal
 │   ├── setup-docker/                          ← OrbStack
-│   └── setup-hysteria2/                       ← proxy client
+│   ├── setup-hysteria2/                       ← Hysteria2 client + `--server` deploy
+│   ├── setup-shadowsocks/                     ← Shadowsocks client + `--server` deploy
+│   └── setup-sing-box/                        ← unified client (Hy2 + SS)
 └── ...
 ```
 

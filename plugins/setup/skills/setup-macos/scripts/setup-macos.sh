@@ -15,6 +15,8 @@ COMPONENTS=(
   "ghostty|Ghostty terminal + Nerd Font|$SKILL_BASE/setup-ghostty/scripts/setup-ghostty.sh"
   "docker|Docker via OrbStack|$SKILL_BASE/setup-docker/scripts/setup-docker.sh"
   "hysteria2|Hysteria 2 proxy client (hy2start/hy2stop/hy2log)|$SKILL_BASE/setup-hysteria2/scripts/setup-hysteria2.sh"
+  "shadowsocks|Shadowsocks client — sslocal (ssstart/ssstop/sslog)|$SKILL_BASE/setup-shadowsocks/scripts/setup-shadowsocks.sh"
+  "sing-box|sing-box client — one client for Hy2 + SS (sbstart/sbnode)|$SKILL_BASE/setup-sing-box/scripts/setup-sing-box.sh"
   "prefs|macOS dev-friendly system preferences (4 settings)|"
 )
 
@@ -63,6 +65,16 @@ check_installed() {
         && [ -f "$HOME/.config/hysteria/config.yaml" ] \
         && [ -f "$HOME/.config/hysteria/aliases.sh" ] \
         && [ -f "$HOME/Library/LaunchAgents/com.hysteria.client.plist" ]
+      ;;
+    shadowsocks)
+      command -v sslocal &>/dev/null \
+        && [ -f "$HOME/.config/shadowsocks/config.json" ] \
+        && [ -f "$HOME/.config/shadowsocks/aliases.sh" ]
+      ;;
+    sing-box)
+      command -v sing-box &>/dev/null \
+        && [ -f "$HOME/.config/sing-box/config.json" ] \
+        && [ -f "$HOME/.config/sing-box/aliases.sh" ]
       ;;
     prefs)
       [ "$(defaults read com.apple.finder AppleShowAllExtensions 2>/dev/null)" = "1" ] \
@@ -113,6 +125,16 @@ status_hint() {
       command -v hysteria &>/dev/null || { echo "no hysteria binary"; return; }
       [ -f "$HOME/.config/hysteria/config.yaml" ] || { echo "no config.yaml"; return; }
       [ -f "$HOME/Library/LaunchAgents/com.hysteria.client.plist" ] || echo "no launchd plist"
+      ;;
+    shadowsocks)
+      command -v sslocal &>/dev/null || { echo "no sslocal binary"; return; }
+      [ -f "$HOME/.config/shadowsocks/config.json" ] || { echo "no config.json"; return; }
+      [ -f "$HOME/.config/shadowsocks/aliases.sh" ] || echo "not set up (no aliases.sh)"
+      ;;
+    sing-box)
+      command -v sing-box &>/dev/null || { echo "no sing-box binary"; return; }
+      [ -f "$HOME/.config/sing-box/config.json" ] || { echo "no config.json"; return; }
+      [ -f "$HOME/.config/sing-box/aliases.sh" ] || echo "not set up (no aliases.sh)"
       ;;
     prefs)
       [ "$(defaults read com.apple.finder AppleShowAllExtensions 2>/dev/null)" = "1" ] || { echo "extensions hidden"; return; }
@@ -345,7 +367,9 @@ echo "  1. Restart your terminal (or: source ~/.zshrc)"
 echo "  2. Run 'p10k configure' to set up the prompt"
 echo "  3. In tmux: prefix + I  to install plugins"
 should_run "git"       && echo "  4. Verify GitHub auth: gh auth status"
-should_run "hysteria2" && echo "  5. Edit ~/.config/hysteria/config.yaml + run 'hy2start'"
-should_run "docker"    && echo "  6. Verify Docker: docker run hello-world"
+should_run "hysteria2"   && echo "  5. Edit ~/.config/hysteria/config.yaml + run 'hy2start'"
+should_run "shadowsocks" && echo "     Edit ~/.config/shadowsocks/config.json + run 'ssstart'"
+should_run "sing-box"    && echo "     Edit ~/.config/sing-box/config.json + run 'sbstart'  (sbnode ss|hy2|auto)"
+should_run "docker"      && echo "  6. Verify Docker: docker run hello-world"
 echo ""
 echo "Re-check status anytime:  bash $SELF --list"
