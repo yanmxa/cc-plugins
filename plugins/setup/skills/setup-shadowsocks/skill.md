@@ -36,8 +36,14 @@ ssstart && sson
 Architecture:
 
 ```
-sslocal(:1084)  ──SOCKS5──▶  sing-box(:1082)  ──HTTP+SOCKS5──▶  终端程序
+sson → :1082(sing-box) → :1084(sslocal) → TCP → 服务器
+       对外统一口          内部 SOCKS5
 ```
+
+| 端口 | 进程 | 说明 |
+|------|------|------|
+| `:1082` | sing-box | 对外统一口，`sson` 指向这里 |
+| `:1084` | sslocal | 内部 SOCKS5，自动管理 |
 
 ### Commands
 

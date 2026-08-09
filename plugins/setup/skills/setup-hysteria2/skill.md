@@ -36,9 +36,14 @@ hy2start && hy2on
 Architecture:
 
 ```
-sing-box(:1081)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  服务器
- HTTP+SOCKS5 统一口            SOCKS5 only
+hy2on → :1081(sing-box) → :1080(hysteria) → QUIC → 服务器
+        对外统一口          内部 SOCKS5
 ```
+
+| 端口 | 进程 | 说明 |
+|------|------|------|
+| `:1081` | sing-box | 对外统一口，`hy2on` 指向这里 |
+| `:1080` | hysteria | 内部 SOCKS5，自动管理 |
 
 ### Commands
 
