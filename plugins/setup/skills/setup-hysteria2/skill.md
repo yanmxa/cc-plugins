@@ -30,7 +30,7 @@ After setup, fill in `server`, `auth`, `tls.pinSHA256` in config.yaml, then:
 
 ```bash
 source ~/.zshrc
-hy2start && proxyon
+hy2start && hy2on
 ```
 
 Architecture:
@@ -51,9 +51,9 @@ sing-box(:1083)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  �
 | `hy2diag` | Full diagnostic: local + remote (SSH) + proxy test |
 | `hy2restart-all` | Restart both server (SSH) and client |
 | `hy2help` | Full command reference |
-| `proxyon` / `proxyoff` / `proxystatus` | Proxy env vars → `HTTP_PROXY=http://:1083`, `ALL_PROXY=socks5://:1083` |
-| `proxyip` | Compare direct vs. proxy egress IP |
-| `proxyspeed` | Test proxy download speed |
+| `hy2on` / `hy2off` / `hy2proxystatus` | Proxy env vars → `HTTP_PROXY=http://:1083`, `ALL_PROXY=socks5://:1083` |
+| `hy2ip` | Compare direct vs. proxy egress IP |
+| `hy2speed` | Test proxy download speed |
 | `gohy2` / `stophy2` | Start+proxy+test / Stop+unset proxy |
 
 ### SSH config (for hy2diag / hy2restart-all)

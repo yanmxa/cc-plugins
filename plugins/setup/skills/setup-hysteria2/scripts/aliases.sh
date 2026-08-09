@@ -129,7 +129,7 @@ hy2edit() {
 # 可在 ~/.zshrc.local 里覆盖 HY2_NO_PROXY 来加自己的（如 *.company.com）
 : "${HY2_NO_PROXY:=localhost,127.0.0.1,::1,*.local,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
 
-proxyon() {
+hy2on() {
   local http="http://127.0.0.1:$HY2_MIXED_PORT"
   local socks="socks5://127.0.0.1:$HY2_MIXED_PORT"
   export http_proxy="$http" https_proxy="$http" all_proxy="$socks" no_proxy="$HY2_NO_PROXY"
@@ -140,7 +140,7 @@ proxyon() {
   echo "  bypass     → $HY2_NO_PROXY"
 }
 
-proxyoff() {
+hy2off() {
   unset http_proxy https_proxy all_proxy no_proxy
   unset HTTP_PROXY HTTPS_PROXY ALL_PROXY NO_PROXY
   echo "代理已关闭"
@@ -148,13 +148,13 @@ proxyoff() {
 
 # 安全自启动：只在 hysteria 真的在监听端口时才开代理（启动失败时不会污染 shell）
 # 用法：在 ~/.zshrc.local 末尾加 `proxyon-auto`
-proxyon-auto() {
+hy2on-auto() {
   if lsof -i ":${HY2_HTTP_PORT:-1081}" -sTCP:LISTEN >/dev/null 2>&1; then
-    proxyon >/dev/null
+    hy2on >/dev/null
   fi
 }
 
-proxystatus() {
+hy2proxystatus() {
   if [[ -n "$http_proxy" || -n "$HTTP_PROXY" ]]; then
     echo "代理已开启:"
     echo "  http_proxy:  ${http_proxy:-<unset>}"
@@ -166,7 +166,7 @@ proxystatus() {
   fi
 }
 
-proxyip() {
+hy2ip() {
   echo "=== 直连 IP ==="
   curl -s --max-time 5 https://api.ip.sb/geoip \
     | python3 -c 'import json,sys; d=json.load(sys.stdin); print(f"  {d.get(\"ip\")} ({d.get(\"country\")} / {d.get(\"isp\")})")' 2>/dev/null \
@@ -177,7 +177,7 @@ proxyip() {
     || echo "  代理不通"
 }
 
-proxyspeed() {
+hy2speed() {
   echo "测试 Hy2 下行速度（10MB 文件）..."
   curl -o /dev/null -x "http://127.0.0.1:$HY2_HTTP_PORT" \
     -w "下载速度: %{speed_download} B/s\n耗时: %{time_total}s\n" \
@@ -421,8 +421,8 @@ hy2restart-all() {
 }
 
 # ── 一键命令 ───────────────────────────────────────────────────────
-gohy2()   { hy2start; sleep 1; proxyon; proxyip; }
-stophy2() { hy2stop; proxyoff; }
+gohy2()   { hy2start; sleep 1; hy2on; hy2ip; }
+stophy2() { hy2stop; hy2off; }
 
 hy2help() {
   cat <<'EOF'
@@ -442,9 +442,9 @@ Hysteria 2 客户端命令：
   hy2restart-all  同时重启服务端（SSH）和本地客户端
 
 代理控制（仅当前 shell）：
-  proxyon / proxyoff / proxystatus
-  proxyip      对比直连 / 代理出口 IP
-  proxyspeed   测试代理下行速度
+  hy2on    / hy2off / hy2proxystatus
+  hy2ip      对比直连 / 代理出口 IP
+  hy2speed   测试代理下行速度
 
 统一端口：HTTP+SOCKS5 → 127.0.0.1:1083 (sing-box → hysteria :1080)
 
