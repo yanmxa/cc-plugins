@@ -36,14 +36,14 @@ hy2start && hy2on
 Architecture:
 
 ```
-hy2on → :1081(sing-box) → :1080(hysteria) → QUIC → 服务器
-        对外统一口          内部 SOCKS5
+hy2on → hysteria(:1080 + :1081) → QUIC → 服务器
+         SOCKS5       HTTP
 ```
 
 | 端口 | 进程 | 说明 |
 |------|------|------|
-| `:1081` | sing-box | 对外统一口，`hy2on` 指向这里 |
-| `:1080` | hysteria | 内部 SOCKS5，自动管理 |
+| `:1081` | hysteria | HTTP 代理，`hy2on` 的 http/https 指向这里 |
+| `:1080` | hysteria | SOCKS5 代理，`hy2on` 的 all_proxy 指向这里 |
 
 ### Commands
 

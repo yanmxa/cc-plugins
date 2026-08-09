@@ -18,9 +18,11 @@ tls:
   insecure: true                       # 跳过标准 CA 验证（self-signed 必填）
   pinSHA256: YOUR_CERT_SHA256          # 用证书指纹做严格校验
 
-# 本地监听端口（仅 SOCKS5 — HTTP+SOCKS5 统一口由 sing-box :1083 提供）
+# 本地监听端口（HTTP :1081 + SOCKS5 :1080，原生支持，无需 sing-box）
 socks5:
   listen: 127.0.0.1:1080
+http:
+  listen: 127.0.0.1:1081
 
 # 带宽（设为你的实际网络带宽）
 bandwidth:
