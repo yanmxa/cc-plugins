@@ -1,7 +1,7 @@
 {
   "name": "setup",
   "description": "macOS development environment bootstrap — Homebrew, Zsh (uv/fnm/Go), Neovim, tmux, Git+gh, Ghostty, Docker (OrbStack), proxies (Hysteria2 / Shadowsocks / sing-box — client on macOS + server deploy over SSH), and system preferences. Modular skills, multi-select picker.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": {
     "name": "Meng Yan",
     "email": "yanmxa@gmail.com"

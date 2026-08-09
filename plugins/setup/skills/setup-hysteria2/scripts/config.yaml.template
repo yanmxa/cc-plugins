@@ -8,7 +8,9 @@
 #   auth           认证密码 / token
 #   tls.pinSHA256  服务器证书 SHA256 指纹
 
-server: SERVER_HOST:443
+server: SERVER_HOST:PORT
+# ⚠️ 如果在中国大陆使用，建议避开 443 端口（GFW DPI 封锁 QUIC/443）。
+#    推荐用 8443 或其他高端口。
 auth: YOUR_AUTH_TOKEN
 
 tls:
