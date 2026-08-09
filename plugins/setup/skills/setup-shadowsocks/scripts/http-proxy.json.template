@@ -1,0 +1,16 @@
+{
+  "_note": "sing-box mixed HTTP+SOCKS5 inbound → SS sslocal SOCKS5 outbound。让 SS 同时提供 HTTP 代理(:1082)和 SOCKS5(:1082)。",
+  "log": {"level": "warn"},
+  "inbounds": [{
+    "type": "mixed",
+    "tag": "ss-http-in",
+    "listen": "127.0.0.1",
+    "listen_port": 1082
+  }],
+  "outbounds": [{
+    "type": "socks",
+    "tag": "ss-out",
+    "server": "127.0.0.1",
+    "server_port": 1084
+  }]
+}
