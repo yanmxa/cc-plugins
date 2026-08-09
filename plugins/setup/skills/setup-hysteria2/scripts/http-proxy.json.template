@@ -4,7 +4,7 @@
     "type": "mixed",
     "tag": "hy2-http-in",
     "listen": "127.0.0.1",
-    "listen_port": 1083
+    "listen_port": 1081
   }],
   "outbounds": [{
     "type": "socks",

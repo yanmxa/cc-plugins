@@ -11,7 +11,7 @@ export HY2_LOG="$HY2_DIR/hysteria.log"
 export HY2_ERR_LOG="$HY2_DIR/hysteria.err.log"
 export HY2_SOCKS_PORT="${HY2_SOCKS_PORT:-1080}"
 export HY2_HTTP_PORT="${HY2_HTTP_PORT:-1081}"
-export HY2_MIXED_PORT="${HY2_MIXED_PORT:-1083}"     # sing-box 混合口（对外统一端口）
+export HY2_MIXED_PORT="${HY2_MIXED_PORT:-1081}"     # sing-box 混合口（对外统一端口）
 # hysteria 可执行文件（手动模式后台直跑时用）
 # 优先用 ~/.local/bin/hysteria（可手动 pin 版本），其次 Homebrew，最后 PATH
 if [ -x "$HOME/.local/bin/hysteria" ]; then
@@ -25,7 +25,7 @@ fi
 # 是否为 launchd 服务模式（存在 plist 即是；否则为手动模式）
 hy2_is_service() { [ -f "$HY2_PLIST" ]; }
 
-# ── sing-box HTTP+SOCKS5 混合口（:1083 → hysteria SOCKS5 :1080） ────
+# ── sing-box HTTP+SOCKS5 混合口（:1081 → hysteria SOCKS5 :1080） ────
 _hy2_http_start() {
   if ! lsof -i ":$HY2_MIXED_PORT" -sTCP:LISTEN > /dev/null 2>&1; then
     nohup sing-box run -c "$HY2_DIR/http-proxy.json" > /dev/null 2>&1 &

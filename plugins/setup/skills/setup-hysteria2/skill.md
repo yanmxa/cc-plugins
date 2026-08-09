@@ -36,7 +36,7 @@ hy2start && hy2on
 Architecture:
 
 ```
-sing-box(:1083)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  服务器
+sing-box(:1081)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  服务器
  HTTP+SOCKS5 统一口            SOCKS5 only
 ```
 
@@ -51,7 +51,7 @@ sing-box(:1083)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  �
 | `hy2diag` | Full diagnostic: local + remote (SSH) + proxy test |
 | `hy2restart-all` | Restart both server (SSH) and client |
 | `hy2help` | Full command reference |
-| `hy2on` / `hy2off` / `hy2proxystatus` | Proxy env vars → `HTTP_PROXY=http://:1083`, `ALL_PROXY=socks5://:1083` |
+| `hy2on` / `hy2off` / `hy2proxystatus` | Proxy env vars → `HTTP_PROXY=http://:1081`, `ALL_PROXY=socks5://:1081` |
 | `hy2ip` | Compare direct vs. proxy egress IP |
 | `hy2speed` | Test proxy download speed |
 | `gohy2` / `stophy2` | Start+proxy+test / Stop+unset proxy |
