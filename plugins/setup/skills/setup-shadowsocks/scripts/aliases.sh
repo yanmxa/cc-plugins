@@ -18,9 +18,21 @@ export SS_BIN="${SS_BIN:-$(command -v sslocal 2>/dev/null)}"
 ss_is_service() { [ -f "$SS_PLIST" ]; }
 
 # ── 服务控制 ───────────────────────────────────────────────────────
+# 启动 HTTP→SOCKS5 转换层(sing-box mixed 口 1082)
+_ss_http_start() {
+  if ! lsof -i ":1082" -sTCP:LISTEN > /dev/null 2>&1; then
+    nohup sing-box run -c "$SS_DIR/http-proxy.json" > /dev/null 2>&1 &
+    sleep 2
+  fi
+}
+_ss_http_stop() {
+  local pid; pid="$(lsof -ti ":1082" -sTCP:LISTEN 2>/dev/null)"
+  [ -n "$pid" ] && kill "$pid" 2>/dev/null
+}
+
 ssstart() {
   if pgrep -f "sslocal -c" > /dev/null; then
-    echo "Shadowsocks 已在运行"; ssstatus; return
+    echo "Shadowsocks 已在运行"; _ss_http_start; ssstatus; return
   fi
   if ss_is_service; then
     launchctl load "$SS_PLIST" 2>/dev/null
@@ -35,6 +47,7 @@ ssstart() {
   sleep 1
   if pgrep -f "sslocal -c" > /dev/null; then
     echo "Shadowsocks 已启动 (PID: $(pgrep -f 'sslocal -c'))"
+    _ss_http_start
   else
     echo "启动失败，查看日志：sslog"
   fi
@@ -46,6 +59,7 @@ ssstop() {
     launchctl unload "$SS_PLIST" 2>/dev/null
   fi
   pkill -f "sslocal -c" 2>/dev/null
+  _ss_http_stop
   echo "Shadowsocks 已停止"
 }
 
@@ -72,7 +86,8 @@ ssstatus() {
       echo "模式:   手动（无开机自启）"
     fi
     echo "SOCKS5: 127.0.0.1:$SS_SOCKS_PORT"
-    lsof -i ":$SS_SOCKS_PORT" 2>/dev/null | grep LISTEN
+    echo "HTTP:   127.0.0.1:1082"
+    lsof -i ":$SS_SOCKS_PORT" -i ":1082" 2>/dev/null | grep LISTEN
   else
     echo "Shadowsocks 未运行"
   fi
@@ -96,11 +111,16 @@ ssedit() {
 : "${SS_NO_PROXY:=localhost,127.0.0.1,::1,*.local,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
 
 sson() {
-  local socks="socks5h://127.0.0.1:$SS_SOCKS_PORT"
-  export http_proxy="$socks" https_proxy="$socks" all_proxy="$socks" no_proxy="$SS_NO_PROXY"
-  export HTTP_PROXY="$socks" HTTPS_PROXY="$socks" ALL_PROXY="$socks" NO_PROXY="$SS_NO_PROXY"
-  echo "代理已开启 → $socks (SOCKS5)"
-  echo "  bypass → $SS_NO_PROXY"
+  # sing-box 混合口(1082)：同时提供 HTTP 代理 + SOCKS5
+  # 底层通过 SOCKS5 转发到 sslocal(1084)
+  local http="http://127.0.0.1:1082"
+  local socks="socks5://127.0.0.1:1082"
+  export http_proxy="$http" https_proxy="$http" all_proxy="$socks" no_proxy="$SS_NO_PROXY"
+  export HTTP_PROXY="$http" HTTPS_PROXY="$http" ALL_PROXY="$socks" NO_PROXY="$SS_NO_PROXY"
+  echo "代理已开启"
+  echo "  http/https → $http"
+  echo "  socks5     → $socks"
+  echo "  bypass     → $SS_NO_PROXY"
 }
 
 ssoff() {

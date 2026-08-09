@@ -1,0 +1,15 @@
+{
+  "log": {"level": "warn"},
+  "inbounds": [{
+    "type": "mixed",
+    "tag": "ss-http-in",
+    "listen": "127.0.0.1",
+    "listen_port": 1082
+  }],
+  "outbounds": [{
+    "type": "socks",
+    "tag": "ss-out",
+    "server": "127.0.0.1",
+    "server_port": 1084
+  }]
+}

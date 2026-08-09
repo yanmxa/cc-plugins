@@ -87,7 +87,12 @@ cp "$SCRIPT_DIR/aliases.sh" "$SS_ALIASES"
 chmod 755 "$SS_ALIASES"
 echo "  Deployed aliases → $SS_ALIASES"
 
-# --- 5. Generate launchd plist (service mode only) ---
+# --- 5. Deploy HTTP proxy config (sing-box mixed port, always overwrite) ---
+cp "$SCRIPT_DIR/http-proxy.json.template" "$SS_DIR/http-proxy.json"
+chmod 644 "$SS_DIR/http-proxy.json"
+echo "  Deployed HTTP proxy config → $SS_DIR/http-proxy.json"
+
+# --- 6. Generate launchd plist (service mode only) ---
 if [ "$INSTALL_SERVICE" -eq 1 ]; then
   mkdir -p "$HOME/Library/LaunchAgents"
   sed -e "s|__HOME__|$HOME|g" \
@@ -151,6 +156,9 @@ echo "  2. Reload shell + start:"
 echo "       source ~/.zshrc"
 echo "       ssstart        # $START_NOTE"
 echo "       ssstatus       # verify"
-echo "       sson           # set SOCKS5 proxy → 127.0.0.1:1084 in this shell"
+echo "       sson           # set HTTP+SOCKS5 proxy → 127.0.0.1:1082 in this shell"
 echo ""
 echo "  Help: sshelp"
+echo ""
+echo "  Ports: SOCKS5 → 127.0.0.1:1084 (sslocal)"
+echo "         HTTP+SOCKS5 → 127.0.0.1:1082 (sing-box)"
