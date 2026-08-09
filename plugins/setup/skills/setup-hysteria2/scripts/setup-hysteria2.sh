@@ -88,7 +88,12 @@ cp "$SCRIPT_DIR/aliases.sh" "$HY2_ALIASES"
 chmod 755 "$HY2_ALIASES"
 echo "  Deployed aliases → $HY2_ALIASES"
 
-# --- 5. Generate launchd plist (service mode only) ---
+# --- 5. Deploy HTTP proxy config (sing-box mixed port, always overwrite) ---
+cp "$SCRIPT_DIR/http-proxy.json.template" "$HY2_DIR/http-proxy.json"
+chmod 644 "$HY2_DIR/http-proxy.json"
+echo "  Deployed HTTP proxy config → $HY2_DIR/http-proxy.json"
+
+# --- 6. Generate launchd plist (service mode only) ---
 if [ "$INSTALL_SERVICE" -eq 1 ]; then
   mkdir -p "$HOME/Library/LaunchAgents"
   sed -e "s|__HOME__|$HOME|g" \
@@ -158,3 +163,5 @@ echo "       hy2status       # verify"
 echo "       proxyon         # set http/https/all_proxy in this shell"
 echo ""
 echo "  Help: hy2help"
+echo ""
+echo "  统一端口: HTTP+SOCKS5 → 127.0.0.1:1083 (sing-box → hysteria :1080)"

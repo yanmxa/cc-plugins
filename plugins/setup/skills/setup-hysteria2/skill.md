@@ -33,6 +33,13 @@ source ~/.zshrc
 hy2start && proxyon
 ```
 
+Architecture:
+
+```
+sing-box(:1083)  ──SOCKS5──▶  hysteria(:1080)  ──QUIC──▶  服务器
+ HTTP+SOCKS5 统一口            SOCKS5 only
+```
+
 ### Commands
 
 | Command | Action |
@@ -44,7 +51,7 @@ hy2start && proxyon
 | `hy2diag` | Full diagnostic: local + remote (SSH) + proxy test |
 | `hy2restart-all` | Restart both server (SSH) and client |
 | `hy2help` | Full command reference |
-| `proxyon` / `proxyoff` / `proxystatus` | Proxy env vars (current shell) |
+| `proxyon` / `proxyoff` / `proxystatus` | Proxy env vars → `HTTP_PROXY=http://:1083`, `ALL_PROXY=socks5://:1083` |
 | `proxyip` | Compare direct vs. proxy egress IP |
 | `proxyspeed` | Test proxy download speed |
 | `gohy2` / `stophy2` | Start+proxy+test / Stop+unset proxy |

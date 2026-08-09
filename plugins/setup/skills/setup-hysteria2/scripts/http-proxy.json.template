@@ -2,14 +2,14 @@
   "log": {"level": "warn"},
   "inbounds": [{
     "type": "mixed",
-    "tag": "ss-http-in",
+    "tag": "hy2-http-in",
     "listen": "127.0.0.1",
-    "listen_port": 1082
+    "listen_port": 1083
   }],
   "outbounds": [{
     "type": "socks",
-    "tag": "ss-out",
+    "tag": "hy2-out",
     "server": "127.0.0.1",
-    "server_port": 1084
+    "server_port": 1080
   }]
 }

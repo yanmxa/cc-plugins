@@ -11,6 +11,7 @@ export HY2_LOG="$HY2_DIR/hysteria.log"
 export HY2_ERR_LOG="$HY2_DIR/hysteria.err.log"
 export HY2_SOCKS_PORT="${HY2_SOCKS_PORT:-1080}"
 export HY2_HTTP_PORT="${HY2_HTTP_PORT:-1081}"
+export HY2_MIXED_PORT="${HY2_MIXED_PORT:-1083}"     # sing-box 混合口（对外统一端口）
 # hysteria 可执行文件（手动模式后台直跑时用）
 # 优先用 ~/.local/bin/hysteria（可手动 pin 版本），其次 Homebrew，最后 PATH
 if [ -x "$HOME/.local/bin/hysteria" ]; then
@@ -23,6 +24,20 @@ fi
 
 # 是否为 launchd 服务模式（存在 plist 即是；否则为手动模式）
 hy2_is_service() { [ -f "$HY2_PLIST" ]; }
+
+# ── sing-box HTTP+SOCKS5 混合口（:1083 → hysteria SOCKS5 :1080） ────
+_hy2_http_start() {
+  if ! lsof -i ":$HY2_MIXED_PORT" -sTCP:LISTEN > /dev/null 2>&1; then
+    nohup sing-box run -c "$HY2_DIR/http-proxy.json" > /dev/null 2>&1 &
+    sleep 2
+  fi
+}
+_hy2_http_stop() {
+  pkill -f "sing-box.*hy2-http" 2>/dev/null
+  # fallback: kill by listening port
+  local pid; pid="$(lsof -ti ":$HY2_MIXED_PORT" -sTCP:LISTEN 2>/dev/null)"
+  [ -n "$pid" ] && kill "$pid" 2>/dev/null
+}
 
 # ── 服务控制 ───────────────────────────────────────────────────────
 hy2start() {
@@ -44,6 +59,7 @@ hy2start() {
   sleep 1
   if pgrep -f "hysteria client" > /dev/null; then
     echo "Hy2 已启动 (PID: $(pgrep -f 'hysteria client'))"
+    _hy2_http_start
   else
     echo "启动失败，查看日志：hy2log"
   fi
@@ -55,6 +71,7 @@ hy2stop() {
     launchctl unload "$HY2_PLIST" 2>/dev/null
   fi
   pkill -f "hysteria client" 2>/dev/null
+  _hy2_http_stop
   echo "Hy2 已停止"
 }
 
@@ -83,7 +100,8 @@ hy2status() {
     fi
     echo "SOCKS5: 127.0.0.1:$HY2_SOCKS_PORT"
     echo "HTTP:   127.0.0.1:$HY2_HTTP_PORT"
-    lsof -i ":$HY2_SOCKS_PORT" -i ":$HY2_HTTP_PORT" 2>/dev/null | grep LISTEN
+    echo "统一口: 127.0.0.1:$HY2_MIXED_PORT  (HTTP+SOCKS5)"
+    lsof -i ":$HY2_SOCKS_PORT" -i ":$HY2_MIXED_PORT" 2>/dev/null | grep LISTEN
   else
     echo "Hy2 未运行"
   fi
@@ -112,11 +130,9 @@ hy2edit() {
 : "${HY2_NO_PROXY:=localhost,127.0.0.1,::1,*.local,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
 
 proxyon() {
-  local http="http://127.0.0.1:$HY2_HTTP_PORT"
-  local socks="socks5://127.0.0.1:$HY2_SOCKS_PORT"
-  # 小写（curl/wget/git/python 等用）
+  local http="http://127.0.0.1:$HY2_MIXED_PORT"
+  local socks="socks5://127.0.0.1:$HY2_MIXED_PORT"
   export http_proxy="$http" https_proxy="$http" all_proxy="$socks" no_proxy="$HY2_NO_PROXY"
-  # 大写（Go/某些 RFC 兼容工具用）
   export HTTP_PROXY="$http" HTTPS_PROXY="$http" ALL_PROXY="$socks" NO_PROXY="$HY2_NO_PROXY"
   echo "代理已开启"
   echo "  http/https → $http"
@@ -429,6 +445,8 @@ Hysteria 2 客户端命令：
   proxyon / proxyoff / proxystatus
   proxyip      对比直连 / 代理出口 IP
   proxyspeed   测试代理下行速度
+
+统一端口：HTTP+SOCKS5 → 127.0.0.1:1083 (sing-box → hysteria :1080)
 
 一键命令：
   gohy2        启动 Hy2 + 开代理 + 测试 IP

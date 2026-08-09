@@ -20,13 +20,14 @@ ss_is_service() { [ -f "$SS_PLIST" ]; }
 # ── 服务控制 ───────────────────────────────────────────────────────
 # 启动 HTTP→SOCKS5 转换层(sing-box mixed 口 1082)
 _ss_http_start() {
-  if ! pgrep -f "sing-box.*ss-http" > /dev/null 2>&1; then
+  if ! lsof -i ":1082" -sTCP:LISTEN > /dev/null 2>&1; then
     nohup sing-box run -c "$SS_DIR/http-proxy.json" > /dev/null 2>&1 &
-    sleep 1
+    sleep 2
   fi
 }
 _ss_http_stop() {
-  pkill -f "sing-box.*ss-http" 2>/dev/null
+  local pid; pid="$(lsof -ti ":1082" -sTCP:LISTEN 2>/dev/null)"
+  [ -n "$pid" ] && kill "$pid" 2>/dev/null
 }
 
 ssstart() {
