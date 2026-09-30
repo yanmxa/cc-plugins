@@ -1,0 +1,9 @@
+{
+  "name": "review",
+  "description": "Language-agnostic code review in four passes, separated by what makes a finding true: metrics (a tool computed it), defects (you can name inputs that break it), excess (something already does this), intent (the spec or a standard says otherwise). Measurement runs first so judgement never re-argues a number.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "yanmxa@gmail.com"
+  }
+}

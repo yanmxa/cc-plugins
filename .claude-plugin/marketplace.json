@@ -57,6 +57,12 @@
       "source": "./plugins/repost",
       "description": "Repurpose a YouTube video into a bilingual (EN/ZH) vertical clip and publish it to 视频号 / 公众号 / Bilibili — search, download, clean auto-captions into sentences, translate, render portrait subtitles (subs in the band, never over the picture), design a cover, and drive the upload",
       "category": "productivity"
+    },
+    {
+      "name": "review",
+      "source": "./plugins/review",
+      "description": "Language-agnostic code review in four ordered passes — metrics, defects, excess, intent — separated by what makes a finding true, with measurement first so judgement never re-argues a number",
+      "category": "development"
     }
   ]
 }

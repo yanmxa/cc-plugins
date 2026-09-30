@@ -12,6 +12,7 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin marketpla
 /plugin install git
 /plugin install jira
 /plugin install claude
+/plugin install review
 ```
 
 ## Plugins
@@ -30,6 +31,19 @@ Jira Cloud REST API v3 CLI and shell library. Sprint boards, issue CRUD, JQL sea
 
 ```
 Bundled: jira-ops CLI + jira-ops.sh sourceable library
+```
+
+### review
+
+Code review in four ordered passes, language-agnostic and read-only. The passes
+are split by what makes a finding true, which is also what stops them repeating
+each other: `metrics` (a tool computed it) → `defects` (you can name inputs that
+break it) → `excess` (something already does this) → `intent` (the spec says
+otherwise). Measurement runs first, so judgement never re-argues a number.
+
+```
+/review:review main     all four passes against the merge-base
+/review:excess          just "what can we delete"
 ```
 
 ### claude
@@ -57,10 +71,17 @@ plugins/
 ├── git/                           # Git automation
 │   └── skills/git/
 │       └── scripts/               # Fork, PR, show-prs
-└── jira/                          # Jira operations
-    └── skills/jira/
-        ├── scripts/               # CLI + shell library
-        └── references/            # API docs
+├── jira/                          # Jira operations
+│   └── skills/jira/
+│       ├── scripts/               # CLI + shell library
+│       └── references/            # API docs
+└── review/                        # Code review, four passes
+    └── skills/
+        ├── review/                # pipeline: runs all four in order
+        ├── metrics/               # what a tool settles
+        ├── defects/               # what breaks
+        ├── excess/                # what should not exist
+        └── intent/                # what was asked for
 ```
 
 ## Contributing
