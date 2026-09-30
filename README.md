@@ -35,14 +35,15 @@ Bundled: jira-ops CLI + jira-ops.sh sourceable library
 
 ### review
 
-Code review in four ordered passes, language-agnostic and read-only. The passes
-are split by what makes a finding true, which is also what stops them repeating
-each other: `metrics` (a tool computed it) → `defects` (you can name inputs that
-break it) → `excess` (something already does this) → `intent` (the spec says
-otherwise). Measurement runs first, so judgement never re-argues a number.
+Code review graded by the **evidence** behind each finding, never by how sure the
+model says it is. `metrics` runs first (deterministic: a tool computed it), then
+`review` fans out into independent angles — correctness, altitude, efficiency,
+reuse, cross-file consistency, conventions — verifies each candidate three-state,
+and sweeps for what the first pass missed. `defects`, `excess` and `intent` are
+focused single-question modes over the same rules.
 
 ```
-/review:review main     all four passes against the merge-base
+/review:review main     the pipeline: angles → verify → sweep
 /review:excess          just "what can we delete"
 ```
 
@@ -75,13 +76,13 @@ plugins/
 │   └── skills/jira/
 │       ├── scripts/               # CLI + shell library
 │       └── references/            # API docs
-└── review/                        # Code review, four passes
+└── review/                        # Code review, evidence-graded
     └── skills/
-        ├── review/                # pipeline: runs all four in order
-        ├── metrics/               # what a tool settles
-        ├── defects/               # what breaks
-        ├── excess/                # what should not exist
-        └── intent/                # what was asked for
+        ├── metrics/               # deterministic; runs first
+        ├── review/                # angles → verify → sweep
+        ├── defects/               # bugs only
+        ├── excess/                # deletions only
+        └── intent/                # spec only
 ```
 
 ## Contributing

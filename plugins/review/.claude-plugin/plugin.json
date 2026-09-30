@@ -1,6 +1,6 @@
 {
   "name": "review",
-  "description": "Language-agnostic code review in four passes, separated by what makes a finding true: metrics (a tool computed it), defects (you can name inputs that break it), excess (something already does this), intent (the spec or a standard says otherwise). Measurement runs first so judgement never re-argues a number.",
+  "description": "Code review graded by the evidence behind each finding, never by how sure the model says it is. Five skills: metrics (deterministic, runs first), review (angles → verify → sweep, with altitude, efficiency and cross-file consistency), and defects/excess/intent as focused single-question modes.",
   "version": "1.0.0",
   "author": {
     "name": "Meng Yan",

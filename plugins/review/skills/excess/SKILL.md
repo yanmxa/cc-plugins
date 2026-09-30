@@ -1,7 +1,10 @@
 ---
 name: excess
-description: Review a diff for code that should not exist — reinvented stdlib, a new dependency for a few lines, an abstraction with one implementation, a helper the repo already has, scope the spec never asked for, and the Fowler smells whose fix is deletion or merging. One line per finding: location, what to cut, what replaces it. Ends with net lines removable. Use when asked what can be deleted, whether a change is over-engineered, or for a simplify pass.
+description: Review a diff for code that should not exist — reinvented stdlib, a dependency for a few lines, an abstraction with one implementation, a helper the repo already has, scope nobody asked for, and the smells whose fix is deletion. One line per finding: location, what to cut, what replaces it. Ends with net lines removable. Use when asked what can be deleted, whether a change is over-engineered, or for a simplify-only pass.
 ---
+
+The deletion-only mode. A full `review` already covers this among its angles;
+use this when the only question is what to cut.
 
 The diff's best outcome is getting shorter. One line per finding.
 
@@ -12,17 +15,17 @@ The diff's best outcome is getting shorter. One line per finding.
 - `delete:` dead code, unused flexibility, speculative feature. Replaces with nothing.
 - `stdlib:` hand-rolled thing the standard library ships. Name the function.
 - `native:` dependency or code doing what the platform already does. Name the feature.
-- `repo:` this codebase already has it. Name the file and symbol — this is the
-  most common kind and the easiest to miss.
-- `yagni:` abstraction with one implementation, config nobody sets, layer with
-  one caller, parameter always passed the same value.
-- `scope:` behaviour the spec did not ask for.
+- `repo:` this codebase already has it. Name the file and symbol.
+- `yagni:` abstraction with one implementation, config nobody sets, layer with one
+  caller, parameter always passed the same value. (Fowler's *Speculative Generality*.)
+- `scope:` behaviour nobody asked for.
 - `shrink:` same logic, fewer lines. Show the shorter form.
-- `smell:<name>` a Fowler smell whose fix is removal or merging: Duplicated Code,
-  Middle Man, Message Chains, Repeated Switches, Refused Bequest, Data Clumps,
-  Primitive Obsession, Feature Envy, Divergent Change, Shotgun Surgery.
+- `smell:<name>` a Fowler smell whose fix removes code: *Duplicated Code*,
+  *Middle Man*, *Message Chains*, *Refused Bequest*.
 
-Speculative Generality is `yagni`, not a smell — same finding, one tag.
+Smells whose fix is a rename or a new type — *Mysterious Name*, *Primitive
+Obsession*, *Data Clumps* — are `intent`'s, not this pass's. Nothing gets counted
+twice.
 
 ## Examples
 
@@ -37,16 +40,19 @@ Speculative Generality is `yagni`, not a smell — same finding, one tag.
 
 ## Before writing a `repo:` finding
 
-Grep for the thing. A helper a few files over is the most common slop and the
-easiest finding to get wrong — cite the symbol you found, or drop the finding.
+Grep for the thing and cite the symbol you found, or drop the finding. A helper a
+few files over is the most common slop and the easiest finding to get wrong.
 
-## Rules that bind this pass
+## Rules
 
-- **A documented repo standard wins.** Where CONTRIBUTING or a standards doc
+- **A documented repo standard wins.** Where `CONTRIBUTING` or a standards doc
   endorses what a tag would flag, suppress it.
-- **Skip what tooling enforces.** The linter's job is not yours.
+- **Skip what tooling enforces.**
 - **Never flag the one smoke test or self-check.** That is the minimum, not bloat.
-- Judgement calls are labelled as such. A smell is a heuristic, never a violation.
+- A smell is a labelled heuristic, never a hard violation.
+
+Out of scope: correctness, security, and performance. Wasted *work* is
+`review`'s Efficiency angle; this pass counts lines, not cycles.
 
 ## Score
 

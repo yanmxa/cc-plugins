@@ -42,6 +42,14 @@ Then, in CRAP order, the findings with their `detail` verbatim. CRAP first is th
 point: a function complexity cleared but tests do not pin is the most likely
 place a change breaks something silently.
 
+## Why this pass runs first
+
+A finding backed by a deterministic rule or a static-analysis tool is one anyone
+can re-derive; a finding backed only by reasoning is an argument. Everything this
+pass produces is the first kind, which is why it is cheap to trust and why it
+must run before any judgement pass — a number already settled here is not
+something to re-argue later.
+
 ## Hand off
 
 Name what you settled, so later passes skip it: "mutation and complexity

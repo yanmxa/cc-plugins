@@ -61,7 +61,7 @@
     {
       "name": "review",
       "source": "./plugins/review",
-      "description": "Language-agnostic code review in four ordered passes — metrics, defects, excess, intent — separated by what makes a finding true, with measurement first so judgement never re-argues a number",
+      "description": "Language-agnostic code review graded by evidence, not conviction: a deterministic metrics prerequisite, an angles-verify-sweep pipeline, and focused defects/excess/intent modes",
       "category": "development"
     }
   ]
