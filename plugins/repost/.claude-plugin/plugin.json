@@ -1,0 +1,9 @@
+{
+  "name": "repost",
+  "description": "Repurpose a YouTube video into a bilingual (EN/ZH) vertical clip and publish it — search, download, clean auto-captions into whole sentences, translate, render portrait subtitles (subs in the letterbox band, never over the picture), design a cover, and drive the upload to 视频号 / 公众号 / Bilibili.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "yanmxa@gmail.com"
+  }
+}
