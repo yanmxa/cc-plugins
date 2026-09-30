@@ -103,9 +103,36 @@ correctness angles hand off to `go-bug-reviewer` and `go-security-reviewer`, and
 cross-file to `go-structure-reviewer`. Want fixes applied as well as found? That is
 `go-optimize`.
 
-## `metrics` and measuring tools
+## Scripts
 
-Prefers [metron](https://github.com/yanmxa/metron): mutation score, cognitive
-complexity and its delta, dead and duplicated code, CRAP ranking. Without it the
-pass falls back to the repo's own coverage and linters and reports the axes it
-could not measure as **unmeasured** — an absent reading is never a pass.
+Three, where hand-work would be unreliable rather than merely tedious. The
+judgement passes have none, because wrapping a judgement in a script does not make
+it deterministic.
+
+| script | why it is not left to the model |
+| --- | --- |
+| `metrics/scripts/measure.sh` | dispatches to established tools per language and names which one produced each reading — a metric nobody can re-derive is not a measurement |
+| `intent/scripts/refs.sh` | a `CLAUDE.md` governs only files at or below its directory, so "which rules apply" is an ancestor walk per changed file |
+| `review/scripts/target.sh` | validates the base and prints the one diff command all angles share, before the fan-out rather than inside it |
+
+## Where the deterministic numbers come from
+
+Nothing in this plugin computes a metric itself. `measure.sh` runs established
+tools and prints what produced each line, through `uvx`/`npx` where it can so most
+need no installing:
+
+| metric | tool | covers |
+| --- | --- | --- |
+| complexity, params, length, nesting | [`lizard`](https://github.com/terryyin/lizard) | 15+ languages, one pass |
+| duplication | [`jscpd`](https://github.com/kucherenko/jscpd) (fallback `lizard -Eduplicate`) | 150+ languages |
+| dead code | `staticcheck -checks=U1000` · [`vulture`](https://github.com/jendrikseipp/vulture) · [`knip`](https://github.com/webpro/knip) | Go · Python · JS/TS |
+| maintainability index | [`radon mi`](https://github.com/rubik/radon) | Python |
+| mutation score | [`metron`](https://github.com/yanmxa/metron) / [`gremlins`](https://github.com/go-gremlins/gremlins) · [`mutmut`](https://github.com/boxed/mutmut) · [`Stryker`](https://stryker-mutator.io) · [`PIT`](https://pitest.org) · [`cargo-mutants`](https://github.com/sourcefrog/cargo-mutants) | Go · Python · JS/TS · Java · Rust |
+
+Mutation is reported as *available*, not run — it executes the test suite. It is
+also the only one that answers whether the tests hold the code up; coverage
+answers "did this line run", and a suite can execute every line while asserting
+nothing.
+
+A tool that is absent makes its axis **unmeasured**, printed with the line that
+installs it. An absent reading is never a pass.

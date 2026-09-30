@@ -1,60 +1,67 @@
 ---
 name: metrics
-description: Settle by measurement what a review would otherwise argue about — mutation score, cognitive complexity and delta, dead and duplicated code, CRAP ranking — by running metron, the test suite and the linter. Use FIRST in any code review, and whenever asked whether tests actually hold the code up, how risky a function is, or which part of a change to look at first. Produces readings against reference ranges, never opinions.
+description: Settle by measurement what a review would otherwise argue about — cyclomatic complexity per function, duplication, dead code, coverage, and mutation score — by running established tools rather than estimating. Every reading names the tool that produced it. Use FIRST in any code review, and whenever asked how complex, duplicated or actually-tested a codebase is.
 ---
 
-Run first. Every question a tool can settle must not reach a judgement pass.
+Run first. Anything a tool can settle must not reach a judgement pass.
 
-Never estimate a metric. Never describe one you did not run. A reading you could
-not take reports as unmeasured, with the reason — an absent number is not a pass.
-
-## Run
+**Nothing here is computed by hand or by eye.** A number is only re-derivable if
+you know which tool produced it, so every reading names its tool. That provenance
+is the difference between a measurement and an assertion — and it is why these
+findings can be trusted without argument while a reasoned one cannot.
 
 ```bash
-metron --since <base> --axes complexity,graph --format json   # ~1s
-metron --since <base> --axes all --budget 10m --format json   # adds mutation: runs the suite
+${CLAUDE_SKILL_DIR}/scripts/measure.sh              # whole tree
+${CLAUDE_SKILL_DIR}/scripts/measure.sh main         # changed files only
+CCN=20 ${CLAUDE_SKILL_DIR}/scripts/measure.sh main  # raise the threshold
 ```
 
-No metron, or not Go: fall back to what the repo has — `go test -cover`,
-`golangci-lint run`, whatever CI runs — and say which axes went unmeasured.
+It dispatches to whatever is available and lists the rest as **unmeasured**, with
+the install line. It runs tools through `uvx`/`npx` where it can, so most of them
+need no installing.
 
-`--all` instead of `--since` reviews existing code. It answers strictly less: no
-`cognitive Δ`, and the bypassed-wrapper and unprecedented-dependency checks do
-not run.
+## What computes what
 
-## Read
+| metric | tool | covers |
+| --- | --- | --- |
+| cyclomatic complexity, params, length, nesting | [`lizard`](https://github.com/terryyin/lizard) | 15+ languages, one pass |
+| duplication | [`jscpd`](https://github.com/kucherenko/jscpd) | 150+ languages |
+| — fallback | `lizard -Eduplicate` | same 15+ |
+| dead code | `staticcheck -checks=U1000` · [`vulture`](https://github.com/jendrikseipp/vulture) · [`knip`](https://github.com/webpro/knip) | Go · Python · JS/TS |
+| maintainability index | [`radon mi`](https://github.com/rubik/radon) | Python |
+| coverage | the language's own runner | all |
+| mutation score | [`metron`](https://github.com/yanmxa/metron) or [`gremlins`](https://github.com/go-gremlins/gremlins) · [`mutmut`](https://github.com/boxed/mutmut) · [`Stryker`](https://stryker-mutator.io) · [`PIT`](https://pitest.org) · [`cargo-mutants`](https://github.com/sourcefrog/cargo-mutants) | Go · Python · JS/TS · Java · Rust |
 
-`measures` carry `status` (`ok`/`warn`/`fail`/`unmeasured`) and the range.
-`observations` carry the finding; **`detail` on a mutation finding is the
-assertion to add**. `diagnostics` holds cyclomatic, fan-out, nesting, CRAP and
-the raw mutant tally.
+Mutation is **reported as available, not run** — it executes the test suite and
+costs minutes. Start it deliberately:
 
-## Report
-
+```bash
+metron --since main --axes all --budget 10m --format json   # Go
+npx stryker run                                             # JS/TS
+mutmut run                                                  # Python
 ```
-mutation score 36% (≥70) · strength 36% · reach 100%   → tests run it, assert nothing
-cognitive Δ    +9  (=0)  RangeArgs                     → got worse, not extracted
-redundant      1   (=0)  1 unreachable
-CRAP 54  cart.go:15 Total   ← highest; complexity alone passed it
-```
 
-Then, in CRAP order, the findings with their `detail` verbatim. CRAP first is the
-point: a function complexity cleared but tests do not pin is the most likely
-place a change breaks something silently.
+Mutation score is the only one of these that answers *whether the tests hold the
+code up*. Coverage answers "did this line run", which is a different question —
+a suite can execute every line and assert nothing.
 
-## Why this pass runs first
+## Read it
 
-A finding backed by a deterministic rule or a static-analysis tool is one anyone
-can re-derive; a finding backed only by reasoning is an argument. Everything this
-pass produces is the first kind, which is why it is cheap to trust and why it
-must run before any judgement pass — a number already settled here is not
-something to re-argue later.
+Highest complexity first, then the duplication pairs, then dead code. Where a
+mutation score exists, rank by **complexity weighted by how poorly tested the
+function is** — a middling function nothing pins is more dangerous than a gnarly
+one with a suite around it. That is
+[CRAP](https://www.artima.com/weblogs/viewpost.jsp?thread=210575); `metron`
+computes it directly.
 
 ## Hand off
 
-Name what you settled, so later passes skip it: "mutation and complexity
-measured; graph unmeasured (no index)". A judgement pass re-arguing a measured
-number is the redundancy this pass exists to remove.
+Name what you settled so later passes skip it: "complexity and duplication
+measured with lizard and jscpd; mutation unmeasured (no runner installed)."
 
-Never edit thresholds, delete tests, or add suppressions to move a reading. If a
-range is wrong for the repo, say so and leave it.
+A judgement pass re-arguing a measured number is the redundancy this pass exists
+to remove. Equally: **an unmeasured axis is never a pass.** Say which tool is
+missing and what installs it.
+
+Never raise a threshold, delete a test, or add a suppression to move a reading.
+If a threshold is wrong for the repo, say so and leave it.

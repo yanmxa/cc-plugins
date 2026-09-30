@@ -11,6 +11,16 @@ Every finding **quotes the line it violates**. No quotable reference, no finding
 
 ## 1 — Find the reference
 
+```bash
+${CLAUDE_SKILL_DIR}/scripts/refs.sh [base]      # default: main
+```
+
+It lists issue refs from the commits, candidate spec files, and — the part worth
+scripting — every `CLAUDE.md` / `AGENTS.md` that actually governs a changed file.
+A rule file applies only to files at or below its directory, so that is an
+ancestor walk per file, and doing it by hand either misses one or cites a rule
+that does not apply.
+
 **Spec**, in order: issue refs in the commit messages (`#123`, `Closes #45`,
 GitLab `!67`) → a path passed as an argument → a spec under `docs/`, `specs/` or
 `.scratch/` matching the branch → ask. None exists: report `no spec available`

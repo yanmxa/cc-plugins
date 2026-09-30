@@ -3,19 +3,20 @@ name: review
 description: Full code review of a diff, branch or PR — correctness, altitude, efficiency, reuse, cross-file consistency and conventions — as independent finder angles, then adversarial verification, then a sweep for what the first pass missed. Grades every finding by the evidence behind it, never by how sure the model says it is. Use when asked to review a change, a PR, a branch, or work in progress.
 ---
 
-Findings are graded by **evidence**, never by conviction. Run `metrics` first:
-what a tool settles must not be argued here.
+Findings are graded by **evidence**, never by conviction.
 
 ## 0 — Pin the target
 
 ```bash
-git rev-parse <base>                              # must resolve
-git diff <base>...HEAD --stat                     # must be non-empty
-git diff @{upstream}...HEAD; git diff HEAD        # committed + uncommitted
+${CLAUDE_SKILL_DIR}/scripts/target.sh [base]    # base defaults to @{upstream}, else main
 ```
 
-Three-dot, so the comparison is against the merge-base. A bad ref or empty diff
-fails here, not inside a fan-out. No base given: ask.
+It resolves the merge-base, covers committed *and* uncommitted work, and prints
+the one diff command every angle must use — so eight parallel finders review the
+same thing. A bad ref or an empty diff fails here rather than inside the fan-out,
+after you have paid for it.
+
+Then run `metrics`: what a tool settles must not be argued here.
 
 ## Effort sets the architecture, not just the count
 
