@@ -1,0 +1,9 @@
+{
+  "name": "review",
+  "description": "Code review graded by the evidence behind each finding, never by how sure the model says it is. Five skills: metrics (deterministic, runs first), review (angles → verify → sweep, with altitude, efficiency and cross-file consistency), and defects/excess/intent as focused single-question modes.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "yanmxa@gmail.com"
+  }
+}

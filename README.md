@@ -12,6 +12,7 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) plugin marketpla
 /plugin install git
 /plugin install jira
 /plugin install claude
+/plugin install review
 ```
 
 ## Plugins
@@ -30,6 +31,20 @@ Jira Cloud REST API v3 CLI and shell library. Sprint boards, issue CRUD, JQL sea
 
 ```
 Bundled: jira-ops CLI + jira-ops.sh sourceable library
+```
+
+### review
+
+Code review graded by the **evidence** behind each finding, never by how sure the
+model says it is. `metrics` runs first (deterministic: a tool computed it), then
+`review` fans out into independent angles — correctness, altitude, efficiency,
+reuse, cross-file consistency, conventions — verifies each candidate three-state,
+and sweeps for what the first pass missed. `defects`, `excess` and `intent` are
+focused single-question modes over the same rules.
+
+```
+/review:review main     the pipeline: angles → verify → sweep
+/review:excess          just "what can we delete"
 ```
 
 ### claude
@@ -57,10 +72,17 @@ plugins/
 ├── git/                           # Git automation
 │   └── skills/git/
 │       └── scripts/               # Fork, PR, show-prs
-└── jira/                          # Jira operations
-    └── skills/jira/
-        ├── scripts/               # CLI + shell library
-        └── references/            # API docs
+├── jira/                          # Jira operations
+│   └── skills/jira/
+│       ├── scripts/               # CLI + shell library
+│       └── references/            # API docs
+└── review/                        # Code review, evidence-graded
+    └── skills/
+        ├── metrics/               # deterministic; runs first
+        ├── review/                # angles → verify → sweep
+        ├── defects/               # bugs only
+        ├── excess/                # deletions only
+        └── intent/                # spec only
 ```
 
 ## Contributing
