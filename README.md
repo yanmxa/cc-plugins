@@ -59,6 +59,14 @@ Repurpose a YouTube video into a bilingual (EN/ZH) vertical clip and publish it 
 Bundled scripts: clean_srt.py, verticalize.py, make_cover.py
 ```
 
+### demo
+
+Animated product demos as a single HTML page that loops in the browser and renders to a crisp GIF/MP4 for a README or landing page. `comic` draws a black-and-white comic-style intro — ink outlines, halftone, stickers, sound effects, and time-driven motion — with a four-scene template and a finished nine-scene example.
+
+```
+Bundled: template.html, shoot.sh (one frame), render.sh (frames → GIF + MP4)
+```
+
 ## How It Works
 
 Each plugin bundles skills with `SKILL.md` definitions and supporting scripts. Skills use `${CLAUDE_SKILL_DIR}` for portable paths, so they work regardless of where Claude Code installs them.
