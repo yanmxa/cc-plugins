@@ -36,6 +36,14 @@ Bundled: jira-ops CLI + jira-ops.sh sourceable library
 
 Meta-development plugin for extending Claude Code itself — extract workflows into reusable slash commands or create specialized subagents.
 
+### repost
+
+Repurpose a YouTube video into a bilingual (EN/ZH) vertical clip and publish it to 视频号 / 公众号 / Bilibili — search, download, clean rolling auto-captions into whole sentences, translate, render portrait subtitles (in the letterbox band, never over the picture), design a cover, and drive the upload.
+
+```
+Bundled scripts: clean_srt.py, verticalize.py, make_cover.py
+```
+
 ## How It Works
 
 Each plugin bundles skills with `SKILL.md` definitions and supporting scripts. Skills use `${CLAUDE_SKILL_DIR}` for portable paths, so they work regardless of where Claude Code installs them.

@@ -3,7 +3,7 @@
   "name": "cc-plugins",
   "description": "Claude Code Plugins for workflow automation with Git, Jira, Dev, and environment setup skills",
   "metadata": {
-    "version": "2.9.0"
+    "version": "2.10.0"
   },
   "owner": {
     "name": "Meng Yan",
@@ -50,6 +50,12 @@
       "name": "video-downloader",
       "source": "./plugins/video-downloader",
       "description": "Download videos from YouTube and other sites using yt-dlp with quality selection, subtitles, and format options",
+      "category": "productivity"
+    },
+    {
+      "name": "repost",
+      "source": "./plugins/repost",
+      "description": "Repurpose a YouTube video into a bilingual (EN/ZH) vertical clip and publish it to 视频号 / 公众号 / Bilibili — search, download, clean auto-captions into sentences, translate, render portrait subtitles (subs in the band, never over the picture), design a cover, and drive the upload",
       "category": "productivity"
     }
   ]
