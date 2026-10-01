@@ -15,13 +15,17 @@ Chinese one-liner (wraps to <=2 lines). --kicker/--english/--handle are optional
 Pick a keyword+subtitle that state what the video is about at a glance.
 """
 import argparse
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops, ImageEnhance
 
 W, H = 1080, 1440          # default 3:4 (视频号); --landscape switches to 16:9 (B站)
 FONT = "/System/Library/Fonts/Hiragino Sans GB.ttc"
-YELLOW = (255, 206, 10)
-WHITE = (245, 245, 245)
-GRAY = (150, 155, 170)
+YELLOW = (255, 209, 48)    # bright warm yellow (keyword)
+WHITE = (248, 249, 255)    # near-pure white (subtitle)
+GRAY = (176, 183, 214)     # soft lavender-gray (kicker / english)
+# Background: a colored indigo→violet gradient with a glow — never a flat black.
+BG_TOP = (28, 27, 74)      # deep indigo  #1C1B4A
+BG_BOT = (67, 47, 128)     # violet       #432F80
+GLOW = (124, 104, 240)     # periwinkle glow behind the keyword
 
 
 def wrap_cjk(draw, text, font, maxw):
@@ -40,9 +44,42 @@ def wrap_cjk(draw, text, font, maxw):
     return lines
 
 
-def center(d, txt, font, y, fill):
+def center(d, txt, font, y, fill, shadow=None):
     w = d.textlength(txt, font=font)
-    d.text(((W - w) / 2, y), txt, font=font, fill=fill)
+    x = (W - w) / 2
+    if shadow:
+        d.text((x + shadow[0], y + shadow[1]), txt, font=font, fill=shadow[2])
+    d.text((x, y), txt, font=font, fill=fill)
+
+
+def build_bg():
+    """A colored indigo→violet gradient + a soft glow behind the keyword + a gentle
+    vignette, so the cover reads as a designed card — never a flat lump of black."""
+    # vertical gradient (built as a 1px column, then stretched — fast)
+    col = Image.new("RGB", (1, H))
+    cp = col.load()
+    for y in range(H):
+        t = y / H
+        cp[0, y] = tuple(int(BG_TOP[i] + (BG_BOT[i] - BG_TOP[i]) * t) for i in range(3))
+    img = col.resize((W, H))
+
+    # soft radial glow behind the keyword area (screen-blended → lightens, adds depth)
+    mask = Image.new("L", (W, H), 0)
+    md = ImageDraw.Draw(mask)
+    cx, cy = W // 2, int(H * 0.40)
+    rx, ry = int(W * 0.52), int(H * 0.24)
+    md.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=150)
+    mask = mask.filter(ImageFilter.GaussianBlur(130))
+    glow = Image.composite(Image.new("RGB", (W, H), GLOW), Image.new("RGB", (W, H), (0, 0, 0)), mask)
+    img = ImageChops.screen(img, glow)
+
+    # vignette: keep the center bright, ease the edges down so the text pops
+    vig = Image.new("L", (W, H), 0)
+    vd = ImageDraw.Draw(vig)
+    vd.ellipse([int(-W * 0.25), int(-H * 0.18), int(W * 1.25), int(H * 1.18)], fill=255)
+    vig = vig.filter(ImageFilter.GaussianBlur(220))
+    img = Image.composite(img, ImageEnhance.Brightness(img).enhance(0.62), vig)
+    return img
 
 
 def main():
@@ -60,14 +97,7 @@ def main():
     if a.landscape:
         W, H = 1920, 1080
 
-    img = Image.new("RGB", (W, H))
-    px = img.load()
-    top, bot = (10, 10, 16), (14, 22, 46)
-    for y in range(H):
-        t = y / H
-        row = tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3))
-        for x in range(W):
-            px[x, y] = row
+    img = build_bg()
     d = ImageDraw.Draw(img)
 
     maxw = W - 140
@@ -97,10 +127,11 @@ def main():
 
     if a.kicker:
         center(d, a.kicker, f_kick, y, GRAY); y += kick_h
-    center(d, a.keyword, f_kw, y, YELLOW); y += ks + 30
+    # keyword with a soft dark shadow so it pops off the glow
+    center(d, a.keyword, f_kw, y, YELLOW, shadow=(0, max(3, ks // 40), (12, 8, 30))); y += ks + 30
     d.rectangle([(W/2 - 90, y), (W/2 + 90, y + 10)], fill=YELLOW); y += 70
     for ln in sub_lines:
-        center(d, ln, f_sub, y, WHITE); y += f_sub.size + 18
+        center(d, ln, f_sub, y, WHITE, shadow=(0, 2, (10, 8, 26))); y += f_sub.size + 18
     if en_lines:
         y += 20
         for ln in en_lines:
