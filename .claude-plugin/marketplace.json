@@ -63,6 +63,12 @@
       "source": "./plugins/review",
       "description": "Language-agnostic code review graded by evidence, not conviction: a deterministic metrics prerequisite, an angles-verify-sweep pipeline, and focused defects/excess/intent modes",
       "category": "development"
+    },
+    {
+      "name": "demo",
+      "source": "./plugins/demo",
+      "description": "Animated product demos as single HTML pages that render to crisp GIF/MP4 — comic: black-and-white comic-style intros",
+      "category": "productivity"
     }
   ]
 }

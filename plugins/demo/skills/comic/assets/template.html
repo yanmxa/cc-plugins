@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme — Intro</title>
+<!--
+  Comic intro template: a timed sequence of scenes on a 1280×720 stage that loops.
+  Click pause/play · R restart · ?t=<seconds> freezes one frame (used by the render scripts).
+  Edit the four scenes, the CAPS captions, and the copy; keep the engine at the bottom.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ── ink on paper: black, white and greys only ── */
+  :root{ --ink:#111; --paper:#f7f6f2; --text:#1b1b1b; --dim:#555; --mute:#8a8a8a; --shadow:6px 6px 0 #111; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#eeede8;overflow:hidden}
+  body{font-family:"Geist Mono",ui-monospace,Menlo,monospace;color:var(--text);display:flex;align-items:center;justify-content:center}
+  .frame{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+  #stage{position:relative;width:1280px;height:720px;flex:none;overflow:hidden;transform-origin:center;background:var(--paper)}
+  /* halftone that thickens toward the edges; the centre keeps a faint wash, never flat */
+  #stage:before{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle, rgba(17,17,17,.20) 1.5px, transparent 2px) 0 0/11px 11px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 75% at 50% 50%, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 45%, #000 100%);
+            mask-image:radial-gradient(ellipse 80% 75% at 50% 50%, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 45%, #000 100%)}
+
+  /* mini logo, top-left; hidden on scenes that show the big one */
+  .brand{position:absolute;top:24px;left:72px;z-index:6;font-family:Bangers,sans-serif;font-size:36px;letter-spacing:2.5px;color:#fff;-webkit-text-stroke:1.6px #111;text-shadow:3px 3px 0 #111;transform:rotate(-3deg)}
+  .brand b{-webkit-text-stroke:0;text-shadow:none;color:#111;font-size:15px;vertical-align:12px;margin-left:2px}
+
+  /* ── caption column (left) ── centred on the same axis as the panel on the right */
+  .caption{position:absolute;left:72px;top:104px;height:496px;width:372px;z-index:5;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s cubic-bezier(.2,.7,.2,1)}
+  .caption.show{opacity:1;transform:none}
+  .kicker{font-family:Bangers,sans-serif;font-size:20px;letter-spacing:2px;color:#111;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+  .kicker .kn{background:#111;color:#fff;padding:2px 9px;border-radius:3px;font-family:"Geist Mono",monospace;font-size:14px;letter-spacing:.04em}
+  .ctitle{font-family:Bangers,Impact,sans-serif;font-size:78px;letter-spacing:1.5px;line-height:.94;color:#111;margin-bottom:28px}
+  .ctitle em{font-style:normal;color:#fff;-webkit-text-stroke:2.2px #111;text-shadow:4px 4px 0 #111}
+  .cdesc{list-style:none;font-family:"Comic Neue",sans-serif;font-size:18px;color:#1d1d1d}
+  .cdesc li{display:flex;align-items:baseline;gap:12px;padding:6px 0}
+  .cdesc li:before{content:"";flex:none;width:9px;height:9px;background:#111;transform:rotate(45deg) translateY(-2px)}
+  .cdesc li b{font-family:Bangers,sans-serif;font-weight:400;font-size:22px;letter-spacing:1.2px;color:#111;min-width:96px}
+  .cdesc li span{font-weight:700;color:#2a2a2a}
+  .cdesc code{font-family:"Geist Mono",monospace;font-size:13.5px;background:#111;color:#fff;padding:0 6px;border-radius:3px}
+
+  /* ── scenes ── */
+  .scene{position:absolute;inset:0;opacity:0;pointer-events:none}
+  .right{position:absolute;left:494px;top:104px;width:708px;height:496px}   /* 494 + 708 + 6px shadow = the 1208 right margin */
+  .r{opacity:0}   /* entrances are driven by the timeline (show / stamp), never CSS transitions */
+
+  /* window: ink outline + solid offset shadow */
+  .win{position:absolute;background:#fff;border:2.5px solid #111;border-radius:10px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+  .win.solo{left:0;right:0;top:50%;transform:translateY(-50%)}
+  .bar{height:38px;flex:none;display:flex;align-items:center;gap:7px;padding:0 14px;border-bottom:2.5px solid #111;font-size:12px}
+  .bar i{width:10px;height:10px;border-radius:50%;border:1.5px solid #111;background:#fff;display:inline-block}
+  .bar .t{margin-left:10px;color:#111;font-weight:700}
+  .body{flex:1;padding:18px 22px;font-size:14px;line-height:1.75;position:relative;overflow:hidden}
+  .status{flex:none;height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:2px solid #111;font-size:11.5px;color:var(--mute);background:repeating-linear-gradient(135deg,#fff 0 6px,#f1f1f1 6px 8px)}
+  .status .on{color:#111;font-weight:700}
+  .cur{display:inline-block;width:8px;height:17px;vertical-align:-3px;margin-left:2px;background:#111}
+
+  /* one line = marker column + content + right-aligned meta, so every row lines up */
+  .ln{display:flex;align-items:baseline;white-space:nowrap}
+  .ln .m{flex:none;width:18px;color:#111}
+  .ln .c{overflow:hidden;text-overflow:ellipsis}
+  .ln .c b{color:#111;font-weight:700;margin-right:10px}
+  .ln .c .p{color:var(--dim)}
+  .ln .x{margin-left:auto;padding-left:10px;font-size:12px;color:var(--mute)}
+  .ln.sub{padding-left:18px;color:var(--mute);font-size:13px}
+  /* a message row keeps the same layout; only its marker becomes a tiny speech bubble (outline = sent, filled = received) */
+  .ln.msg .m{position:relative;color:transparent}
+  .ln.msg .m:before{content:"";position:absolute;left:0;top:50%;margin-top:-6px;width:12px;height:9px;border:1.6px solid #111;border-radius:3px;background:#fff;box-sizing:border-box}
+  .ln.msg .m:after{content:"";position:absolute;left:2px;top:50%;margin-top:2.5px;border-style:solid;border-width:4px 4px 0 0;border-color:#111 transparent transparent}
+  .ln.msg.from .m:before{background:#111}
+
+  /* comic devices: use sparingly */
+  .sfx{position:absolute;z-index:8;font-family:Bangers,Impact,sans-serif;font-size:46px;letter-spacing:2px;color:#fff;-webkit-text-stroke:2px #111;text-shadow:4px 4px 0 #111;opacity:0;pointer-events:none;white-space:nowrap}
+  .tagline{font-family:Bangers,sans-serif;font-size:17px;letter-spacing:1.5px;color:#fff;background:#111;padding:4px 12px 2px;border-radius:3px;box-shadow:3px 3px 0 rgba(17,17,17,.2);opacity:0;white-space:nowrap}
+  .burst line,.mlines line{stroke:#111;stroke-width:2.2;stroke-linecap:round}
+  .glayer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:3}
+  .mail rect{fill:#fff;stroke:#111;stroke-width:2}.mail path{fill:none;stroke:#111;stroke-width:2;stroke-linejoin:round}
+
+  /* splash (intro / outro) */
+  .splash{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .logo{font-family:Bangers,Impact,sans-serif;font-size:168px;letter-spacing:8px;line-height:1;color:#fff;-webkit-text-stroke:5px #111;text-shadow:10px 10px 0 #111;position:relative;opacity:0}
+  .logo .sp{position:absolute;top:-6px;right:-46px;font-size:56px;color:#111;-webkit-text-stroke:0;text-shadow:none;transform:rotate(14deg)}
+  .tag{font-family:Bangers,sans-serif;font-size:54px;letter-spacing:1.5px;color:#111;margin-top:18px}
+  .tag em{font-style:normal;color:#fff;-webkit-text-stroke:2px #111;text-shadow:3px 3px 0 #111}
+  .stats{display:flex;gap:22px;margin-top:40px}
+  .stat{width:220px;padding:20px 22px;background:#fff;border:2.5px solid #111;border-radius:10px;box-shadow:var(--shadow);text-align:left;opacity:0}
+  .stat b{display:block;font-family:Bangers,sans-serif;font-size:54px;letter-spacing:1px;color:#111;line-height:1}
+  .stat span{display:block;margin-top:8px;font-size:12.5px;color:var(--dim)}
+  /* a balloon whose tail points up at the headline, with a round badge */
+  .balloon{position:relative;margin-top:44px;font-size:24px;color:#111;padding:12px 28px 12px 64px;background:#fff;border:2.5px solid #111;border-radius:26px;box-shadow:5px 5px 0 #111;opacity:0}
+  .balloon:before{content:"";position:absolute;left:50%;top:-16px;border-style:solid;border-width:0 10px 16px 10px;border-color:transparent transparent #111}
+  .balloon:after{content:"";position:absolute;left:calc(50% + 3px);top:-11px;border-style:solid;border-width:0 7px 12px 7px;border-color:transparent transparent #fff}
+  .balloon .star{position:absolute;left:12px;top:50%;margin-top:-19px;width:38px;height:38px;border-radius:50%;background:#111;color:#fff;font-size:20px;line-height:38px;text-align:center;transform:rotate(12deg)}
+  .balloon b{font-weight:700}
+  .stickers{display:flex;gap:16px;margin-top:30px}
+  .stickers span{font-family:Bangers,sans-serif;font-size:24px;letter-spacing:1.5px;color:#fff;background:#111;padding:4px 14px 2px;border-radius:4px;box-shadow:3px 3px 0 rgba(17,17,17,.25);opacity:0}
+
+  /* progress: a faint track, only the played part is ink */
+  .timeline{position:absolute;left:72px;right:72px;bottom:30px;height:3px;background:rgba(17,17,17,.08);border-radius:2px;z-index:6}
+  .timeline .fill{height:100%;width:0;background:#111;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="frame"><div id="stage">
+  <div class="brand" id="brand">ACME<b>✦</b></div>
+
+  <div class="caption" id="caption">
+    <div class="kicker" id="cap-k"></div>
+    <div class="ctitle" id="cap-t"></div>
+    <ul class="cdesc" id="cap-d"></ul>
+  </div>
+
+  <!-- ░░ INTRO ░░ logo slams in with action lines; stat cards slap down -->
+  <section class="scene" id="intro" data-start="0" data-dur="5">
+    <svg class="glayer" viewBox="0 0 1280 720" style="width:1280px;height:720px"><g class="burst" id="i-burst"></g></svg>
+    <div class="splash">
+      <div class="tagline" id="i-kind" style="margin-bottom:6px">open-source widget engine</div>
+      <div class="logo" id="i-logo">ACME<span class="sp">✦</span></div>
+      <div class="tag r" id="i-tag">Small tool. <em>Big lift.</em></div>
+      <div class="stats">
+        <div class="stat" id="i-s1"><b>0.01s</b><span>cold start</span></div>
+        <div class="stat" id="i-s2"><b>8 MB</b><span>one binary</span></div>
+        <div class="stat" id="i-s3"><b>40+</b><span>integrations</span></div>
+      </div>
+    </div>
+    <div class="sfx" id="sfx-zip" style="left:250px;top:392px">ZIP!</div>
+  </section>
+
+  <!-- ░░ WORK ░░ one terminal doing real steps; a stamp lands when it is done -->
+  <section class="scene" id="work" data-start="5" data-dur="7">
+    <div class="right">
+      <div class="win solo">
+        <div class="bar"><i></i><i></i><i></i><span class="t">acme — ~/shop</span></div>
+        <div class="body">
+          <div class="ln"><span class="m">❭</span><span class="c" style="color:#111"><span id="w-type"></span><span class="cur" id="w-cur"></span></span></div>
+          <div class="ln r" id="w-1"><span class="m">●</span><span class="c"><b>Read</b><span class="p">server/router.go</span></span></div>
+          <div class="ln r" id="w-2"><span class="m">●</span><span class="c"><b>Edit</b><span class="p">router.go</span></span><span class="x">+9</span></div>
+          <div class="ln r" id="w-3"><span class="m">●</span><span class="c"><b>Write</b><span class="p">health_test.go</span></span><span class="x">+24</span></div>
+          <div class="ln r" id="w-4"><span class="m">●</span><span class="c"><b>Bash</b><span class="p">go test ./...</span></span><span class="x">ok</span></div>
+          <div class="ln r" id="w-5" style="margin-top:6px"><span class="m">●</span><span class="c" style="color:#111">Added GET /healthz with a table-driven test.</span></div>
+        </div>
+        <div class="status"><span id="w-st">running</span><span>3.3s</span></div>
+      </div>
+    </div>
+    <div class="sfx" id="sfx-done" style="left:1060px;top:150px">DONE!</div>
+  </section>
+
+  <!-- ░░ TALK ░░ two sessions: each works first, then sends; an envelope flies between them -->
+  <section class="scene" id="talk" data-start="12" data-dur="10">
+    <div class="right">
+      <div class="win" style="left:0;top:83px;width:347px;height:330px">
+        <div class="bar"><i></i><i></i><i></i><span class="t">api</span></div>
+        <div class="body" id="t-a" style="padding:12px 16px;font-size:12.5px">
+          <div class="ln r" id="a1"><span class="m">●</span><span class="c"><b>Edit</b><span class="p">orders.go</span></span><span class="x">+4 −2</span></div>
+          <div class="ln r" id="a2"><span class="m">●</span><span class="c"><b>Bash</b><span class="p">go test ./...</span></span><span class="x">ok</span></div>
+          <div class="ln msg r" id="a3"><span class="m">●</span><span class="c">To <b>@web</b>amounts are now cents</span></div>
+          <div class="ln sub r" id="a3r">└ Sent · reading now</div>
+          <div class="ln msg from r" id="a4"><span class="m">●</span><span class="c">From <b>@web</b>checkout uses cents</span></div>
+          <div class="ln r" id="a5"><span class="m">●</span><span class="c"><b>Read</b><span class="p">../web/format.ts</span></span></div>
+          <div class="ln msg r" id="a6"><span class="m">●</span><span class="c">To <b>@web</b>avoid toFixed, use cents</span></div>
+        </div>
+        <div class="status"><span class="on">◆ shop/api</span><span id="t-ast">working</span></div>
+      </div>
+      <div class="win" style="left:361px;top:83px;width:347px;height:330px">
+        <div class="bar"><i></i><i></i><i></i><span class="t">web</span></div>
+        <div class="body" id="t-w" style="padding:12px 16px;font-size:12.5px">
+          <div class="ln" style="color:var(--mute)"><span class="m"></span><span class="c">checkout page · idle</span></div>
+          <div class="ln msg from r" id="w1"><span class="m">●</span><span class="c">From <b>@api</b>amounts are now cents</span></div>
+          <div class="ln r" id="wa"><span class="m">●</span><span class="c"><b>Edit</b><span class="p">order.ts</span></span><span class="x">+3 −1</span></div>
+          <div class="ln r" id="wb"><span class="m">●</span><span class="c"><b>Bash</b><span class="p">npm test</span></span><span class="x">ok</span></div>
+          <div class="ln msg r" id="wc"><span class="m">●</span><span class="c">To <b>@api</b>checkout uses cents</span></div>
+          <div class="ln msg from r" id="wd"><span class="m">●</span><span class="c">From <b>@api</b>avoid toFixed, use cents</span></div>
+          <div class="ln r" id="we"><span class="m">●</span><span class="c"><b>Edit</b><span class="p">format.ts</span></span><span class="x">+5 −4</span></div>
+        </div>
+        <div class="status"><span class="on">◆ shop/web</span><span id="t-wst">idle</span></div>
+      </div>
+      <svg class="glayer" viewBox="0 0 708 496">
+        <g class="mlines" id="trail"><line/><line/><line/></g>
+        <g class="mail" id="mail" style="opacity:0"><rect x="-9" y="-6.5" width="18" height="13" rx="2"/><path d="M-9 -5.5 L0 1.5 L9 -5.5"/></g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ░░ OUTRO ░░ -->
+  <section class="scene" id="outro" data-start="22" data-dur="6">
+    <div class="splash">
+      <div class="logo" id="z-logo">ACME<span class="sp">✦</span></div>
+      <div class="tag r" id="z-tag">One binary. <em>Every widget.</em></div>
+      <div class="balloon" id="z-gh"><span class="star">★</span>github.com/<b>acme/acme</b></div>
+      <div class="stickers"><span id="z-t1">open source</span><span id="z-t2">macOS</span><span id="z-t3">Linux</span><span id="z-t4">Windows</span></div>
+    </div>
+  </section>
+
+  <div class="timeline"><div class="fill" id="fill"></div></div>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const SEEK = params.has('t') ? parseFloat(params.get('t')) : null;   // freeze one frame for rendering
+// a frozen frame must not catch a CSS transition half-way (it would depend on machine load); timeline-driven motion still shows
+if (SEEK !== null) document.head.insertAdjacentHTML('beforeend', '<style>*,*::before,*::after{transition:none!important;animation:none!important}</style>');
+
+const scenes = [...document.querySelectorAll('.scene')].map(el => ({ el, id: el.id, start: +el.dataset.start, dur: +el.dataset.dur, pace: +(el.dataset.pace || 1) }));
+const TOTAL = Math.max(...scenes.map(s => s.start + s.dur));
+const HOLD = 1.0;
+function fit(){ $('stage').style.transform = `scale(${Math.min(innerWidth / 1280, innerHeight / 720)})`; }
+addEventListener('resize', fit); fit();
+
+// Left-column captions per scene; omit a scene to show none. "<b>Term</b> — gloss" becomes term + gloss.
+const CAPS = {
+  work: {k:'Build', t:'Does the <em>work</em>', d:['<b>Read</b> — the code first','<b>Edit</b> — small, exact changes','<b>Test</b> — <code>go test</code> before done']},
+  talk: {k:'Teams', t:'Sessions that <em>talk</em>', d:['<b>Message</b> — reach each other','<b>Review</b> — peers correct work','<b>Local</b> — no server']},
+};
+
+// ── helpers: every animation is a pure function of time, so ?t= renders it exactly ──
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sub = (full, lt, t0, t1) => lt < t0 ? '' : lt >= t1 ? full : full.slice(0, Math.round(full.length * (lt - t0) / (t1 - t0)));
+const typeInto = (el, full, lt, t0, t1) => { el.textContent = sub(full, lt, t0, t1); };
+const cursor = (el, lt, t0, t1) => { el.style.display = lt > t0 && lt < t1 ? 'inline-block' : 'none'; };
+const spin = lt => '◐◓◑◒'[Math.floor(lt * 8) % 4];
+// show: rise in with a small pop at t0
+function show(el, lt, t0){
+  if (lt <= t0) { el.style.opacity = 0; el.style.transform = ''; return; }
+  const k = clamp((lt - t0) / .32, 0, 1), e = 1 - (1 - k) ** 3;
+  el.style.opacity = e;
+  el.style.transform = k < 1 ? `translateY(${(1 - e) * 8}px) scale(${1 + .05 * Math.sin(Math.PI * k)})` : '';
+}
+// stamp: slap a sticker / sound effect on at t0 (overshoot, settle) and keep it until t1
+function stamp(id, lt, t0, t1, rot, over = .7){
+  const el = $(id), k = lt - t0;
+  el.style.opacity = lt > t0 && lt < t1 ? 1 : 0;
+  el.style.transform = `rotate(${rot}deg) scale(${k < .14 ? 1 + over * (1 - k / .14) : 1})`;
+}
+// burst: comic action lines radiating from (cx, cy), alive for 1s from t0
+function burst(g, lt, t0, cx, cy, r0, squash){
+  const k = clamp((lt - t0) / 1.0, 0, 1);
+  if (!g.childElementCount) for (let j = 0; j < 32; j++) g.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'line'));
+  g.style.opacity = k > 0 && k < 1 ? 1 - k * k : 0;
+  [...g.children].forEach((l, j) => {
+    const a = j / 32 * Math.PI * 2 + (j % 2) * .05, r1 = r0 + 260 * k + (j % 3) * 12, r2 = r1 + 22 + (j % 4) * 10;
+    l.setAttribute('x1', cx + r1 * Math.cos(a)); l.setAttribute('y1', cy + r1 * Math.sin(a) * squash);
+    l.setAttribute('x2', cx + r2 * Math.cos(a)); l.setAttribute('y2', cy + r2 * Math.sin(a) * squash);
+  });
+}
+
+// ── scenes ──
+function intro(lt){
+  stamp('i-kind', lt, .7, 99, -3);
+  stamp('i-logo', lt, .2, 99, -3);
+  burst($('i-burst'), lt, .2, 640, 236, 150, .55);
+  show($('i-tag'), lt, .9);
+  [['i-s1', 1.8, -2], ['i-s2', 2.1, 1.5], ['i-s3', 2.4, -1]].forEach(([id, t0, rot]) => stamp(id, lt, t0, 99, rot, .25));
+  stamp('sfx-zip', lt, 2.0, 3.2, -10);
+}
+function work(lt){
+  typeInto($('w-type'), 'add a /healthz endpoint with a test', lt, .3, 1.2); cursor($('w-cur'), lt, .2, 1.4);
+  [1.5, 2.0, 2.6, 3.3, 4.0].forEach((t, i) => show($('w-' + (i + 1)), lt, t));
+  $('w-st').textContent = lt > 4.0 ? 'done' : 'running';
+  stamp('sfx-done', lt, 4.2, 5.6, 8);
+}
+// talk: [row, time it appears]; a message row also names where its envelope lands and when it flies
+const TALK = [['a1', .4], ['a2', 1.1], ['a3', 1.9], ['a3r', 2.2], ['w1', 2.8], ['wa', 3.4], ['wb', 4.1], ['wc', 4.8],
+              ['a4', 5.5], ['a5', 6.1], ['a6', 6.8], ['wd', 7.5], ['we', 8.2]];
+const MAILS = [['a3', 't-w', 2.0, 2.8], ['wc', 't-a', 4.9, 5.5], ['a6', 't-w', 6.9, 7.5]];
+function talk(lt){
+  TALK.forEach(([id, t]) => { const el = $(id); el.style.display = lt > t ? '' : 'none'; show(el, lt, t); });
+  for (const b of [$('t-a'), $('t-w')]) b.scrollTop = b.scrollHeight;   // newest line at the bottom
+  $('t-ast').textContent = lt < 2.0 || (lt > 5.5 && lt < 6.9) ? 'working' : 'idle';
+  $('t-wst').textContent = (lt > 2.8 && lt < 4.9) || lt > 7.5 ? 'working' : 'idle';
+  const m = MAILS.find(([, , t0, t1]) => lt > t0 && lt < t1), mail = $('mail');
+  mail.style.opacity = $('trail').style.opacity = m ? 1 : 0;
+  if (!m) return;
+  const [from, to, t0, t1] = m, a = rowPoint($(from)), b = landing($(to), a);
+  const x1 = b.x > a.left ? a.right : a.left;
+  const at = k => { const e = k * k * (3 - 2 * k); return [x1 + (b.x - x1) * e, a.y + (b.y - a.y) * e - 22 * Math.sin(Math.PI * k)]; };
+  const k = clamp((lt - t0) / (t1 - t0), 0, 1), [x, y] = at(k);
+  mail.setAttribute('transform', `translate(${x} ${y})`);
+  // three short motion lines behind the envelope
+  const [px, py] = at(Math.max(0, k - .08)), len = Math.hypot(x - px, y - py) || 1, dx = (x - px) / len, dy = (y - py) / len;
+  [...$('trail').children].forEach((l, j) => {
+    const o = (j - 1) * 5, back = 16 + Math.abs(j - 1) * 4, n = 14 - Math.abs(j - 1) * 4;
+    const sx = x - dx * back - dy * o, sy = y - dy * back + dx * o;
+    l.setAttribute('x1', sx); l.setAttribute('y1', sy); l.setAttribute('x2', sx - dx * n); l.setAttribute('y2', sy - dy * n);
+  });
+}
+// positions from offsets, not client rects: the scene's entrance transform would skew rects
+function rowPoint(el){
+  const win = el.closest('.win'), body = el.closest('.body');
+  return { left: win.offsetLeft + 10, right: win.offsetLeft + win.offsetWidth - 10,
+           y: win.offsetTop + body.offsetTop + el.offsetTop - body.scrollTop + el.offsetHeight / 2 };
+}
+function landing(body, from){
+  const win = body.closest('.win'), rows = [...body.children].filter(r => r.style.display !== 'none'), last = rows[rows.length - 1], h = last.offsetHeight;
+  const y = Math.min(last.offsetTop - body.scrollTop + h * 1.5, body.clientHeight - 12 - h / 2);
+  return { x: win.offsetLeft > from.left ? win.offsetLeft + 14 : win.offsetLeft + win.offsetWidth - 14, y: win.offsetTop + body.offsetTop + y };
+}
+function outro(lt){
+  stamp('z-logo', lt, .2, 99, -3);
+  show($('z-tag'), lt, .8);
+  stamp('z-gh', lt, 1.6, 99, -2, .25);
+  [-6, 4, -3, 5].forEach((rot, i) => stamp('z-t' + (i + 1), lt, 2.3 + i * .22, 99, rot));
+}
+const RUN = { intro, work, talk, outro };
+
+// ── engine ──
+let base = null, paused = false, pausedAt = 0, t = 0, curCap = null;
+function frame(now){
+  if (SEEK !== null) t = SEEK;
+  else { if (base === null) base = now; if (!paused) t = (now - base) / 1000; if (t > TOTAL + HOLD) { base = now; t = 0; } }
+  let act = null;
+  scenes.forEach(s => {
+    const lt = t - s.start, on = lt >= 0 && lt < s.dur;
+    const op = !on ? 0 : lt < .45 ? lt / .45 : lt > s.dur - .45 ? Math.max(0, (s.dur - lt) / .45) : 1;
+    s.el.style.opacity = op;
+    if (on) { act = { id: s.id, el: s.el, lt, dur: s.dur }; RUN[s.id](lt * s.pace); }
+  });
+  const cap = act && CAPS[act.id];
+  if (cap && act.id !== curCap) {
+    $('cap-k').innerHTML = `<span class="kn">${String(Object.keys(CAPS).indexOf(act.id) + 1).padStart(2, '0')}</span>${cap.k}`;
+    $('cap-t').innerHTML = cap.t;
+    $('cap-d').innerHTML = cap.d.map(x => `<li>${x.replace('</b> — ', '</b><span>')}</span></li>`).join('');
+    curCap = act.id;
+  }
+  if (cap) {   // a lone window is never shorter than the caption beside it
+    const capH = $('cap-d').offsetTop + $('cap-d').offsetHeight - $('cap-k').offsetTop;
+    act.el.querySelectorAll('.win.solo').forEach(w => { w.style.minHeight = capH + 'px'; });
+  }
+  $('caption').classList.toggle('show', !!(cap && act.lt > .35 && act.lt < act.dur - .4));
+  $('brand').style.opacity = act && (act.id === 'intro' || act.id === 'outro') ? 0 : 1;   // the big logo is on screen there
+  $('fill').style.width = (Math.min(t, TOTAL) / TOTAL * 100) + '%';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+$('stage').addEventListener('click', () => { paused = !paused; if (paused) pausedAt = performance.now(); else if (base !== null) base += performance.now() - pausedAt; });
+addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') { base = null; t = 0; paused = false; } });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "demo",
+  "description": "Animated product demos as single HTML pages that render to crisp GIF/MP4 — comic: a black-and-white comic-style intro with ink outlines, halftone, stickers and time-driven motion.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Meng Yan",
+    "email": "yanmxa@gmail.com"
+  }
+}
